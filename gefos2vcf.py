@@ -21,7 +21,8 @@ else:
 print('#CHROM\tPOS\tID\tREF\tALT\tFILTER\tINFO\tFORMAT\tGEFOS')
 file = open(gefos,"r")
 for line in file:
-    fields = line.split("\t")
+    clean_line = line.rstrip('\r\n')
+    fields = clean_line.split("\t")
     rsid = fields[1]
     if rsid == 'RSID':
         continue
@@ -31,6 +32,6 @@ for line in file:
     alt = fields[5]
     filter = '.'
     info = fields[6] + ',' + fields[7] + ',' + fields[8] + ',' + fields[9] \
-         + ',' + fields[10] + ',' + fields[11] + ',' + fields[12] + ',' + fields[13]
+         + ',' + fields[10] + ',' + fields[11] + ',' + fields[12] + ',' + fields[13] 
     print(chr + '\t' + pos + '\t' + rsid + '\t' + ref + '\t' + alt + '\t' + filter + '\t' + info + '\tNA\tNA')
 file.close()
