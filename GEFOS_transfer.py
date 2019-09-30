@@ -100,10 +100,10 @@ def main():
         output = gefos + '_annovar'
         wfile = open(output,'w')
         if gwas_type == 'bmd':
-           bmd_header_list = [EAF,INFO,BETA,SE,P,P.I,P.NI,N]
+           header_list = ['EAF','INFO','BETA','SE','P','P.I','P.NI','N']
            header = '\t'
         elif gwas_type == 'fraca':
-            fraca_header_list = [A1FREQ,INFO,logOR,logOR.SE,OR,L95,U95,P,P.I,P.NI,N]
+            header_list = ['A1FREQ','INFO','logOR','logOR.SE','OR','L95','U95','P','P.I','P.NI','N']
         header = '\t'
         header = header.join(header_list)
         wfile.write('#Chr\tStart\tEnd\tRef\tAlt\t' + header_list + '\n')
@@ -143,7 +143,7 @@ def main():
                     p_i = content[8]
                     p_ni = content[9]
                     n = content[10]
-                    annotation_list = [chr,start,enmd,ref,alr,a1freq,info,logor,logor_se,OR,l95,u95,p,p_i,p_ni,n]
+                    annotation_list = [chr,start,end,ref,alt,a1freq,info,logor,logor_se,OR,l95,u95,p,p_i,p_ni,n]
                 annotation = '\t'
                 annotation = annotation.join(annotation_list)
                 wfile.write(annotation_list + '\n')
