@@ -2,7 +2,7 @@ import argparse
 import os
 # initiate the parser
 def parse_arguments():
-    parser = argparse.ArgumentParser(prog='Transfer GEFOS data to vcf/annovar format.',
+    parser = argparse.ArgumentParser(prog='Transfer Gefos data to vcf/annovar format.',
                                         description='')
 
     # add long and short argument
