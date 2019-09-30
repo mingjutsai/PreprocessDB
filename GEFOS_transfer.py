@@ -28,11 +28,12 @@ def main():
         gwas_type = 'fraca'
     if os.path.exists(args.input[0]):
         gefos = args.input[0]
-        print('#gefos:' + gefos)
+        print('input:' + gefos)
     else:
         raise Exception('input file does not exist')
     if transfer_status == 'vcf':
         output = gefos + '.vcf'
+        print('output:' + output)
         wfile = open(output,'w')
         if  gwas_type == 'bmd':
             wfile.write('#CHROM\tPOS\tID\tREF\tALT\tFILTER\tINFO\tFORMAT\tGEFOS_Bmd\n')
@@ -98,6 +99,7 @@ def main():
         wfile.close()
     elif transfer_status == 'annovar':
         output = gefos + '_annovar'
+        print('output:' + output)
         wfile = open(output,'w')
         if gwas_type == 'bmd':
            header_list = ['EAF','INFO','BETA','SE','P','P.I','P.NI','N']
