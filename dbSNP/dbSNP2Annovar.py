@@ -57,18 +57,21 @@ def main():
         if match_header:
             continue
         else:
-            chr = assembly_map[fields[0]]
-            start = int(fields[1])
-            rsid = fields[2]
-            ref = fields[3]
-            alt = fields[4]
-            end = start + len(ref) - 1
-            if ',' in alt:
-                all_alt = alt.split(',')
-                for i in all_alt:
-                   wfile.write(chr + '\t' + str(start) + '\t' + str(end) + '\t' + ref + '\t' + i + '\t' + rsid + '\n')
+            if fields[0] in assembly_map:
+                chr = assembly_map[fields[0]]
+                start = int(fields[1])
+                rsid = fields[2]
+                ref = fields[3]
+                alt = fields[4]
+                end = start + len(ref) - 1
+                if ',' in alt:
+                    all_alt = alt.split(',')
+                    for i in all_alt:
+                        wfile.write(chr + '\t' + str(start) + '\t' + str(end) + '\t' + ref + '\t' + i + '\t' + rsid + '\n')
+                else:
+                    wfile.write(chr + '\t' + str(start) + '\t' + str(end) + '\t' + ref + '\t' + alt + '\t' + rsid + '\n')
             else:
-                wfile.write(chr + '\t' + str(start) + '\t' + str(end) + '\t' + ref + '\t' + alt + '\t' + rsid + '\n')
+                continue
     rfile.close
     wfile.close
 
