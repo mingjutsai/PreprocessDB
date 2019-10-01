@@ -108,7 +108,7 @@ def main():
             header_list = ['A1FREQ','INFO','logOR','logOR.SE','OR','L95','U95','P','P.I','P.NI','N']
         header = '\t'
         header = header.join(header_list)
-        wfile.write('#Chr\tStart\tEnd\tRef\tAlt\t' + header_list + '\n')
+        wfile.write('#Chr\tStart\tEnd\tRef\tAlt\t' + header + '\n')
         rfile = open(gefos,"r")
         for line in rfile:
             clean_line = line.rstrip('\r\n')
@@ -148,7 +148,7 @@ def main():
                     annotation_list = [chr,start,end,ref,alt,a1freq,info,logor,logor_se,OR,l95,u95,p,p_i,p_ni,n]
                 annotation = '\t'
                 annotation = annotation.join(annotation_list)
-                wfile.write(annotation_list + '\n')
+                wfile.write(annotation + '\n')
         rfile.close()
         wfile.close()
 
