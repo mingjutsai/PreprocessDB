@@ -133,7 +133,7 @@ def main():
                     p_i = content[5]
                     p_ni = content[6]
                     n = content[7]
-                    annotation_list = [chr,start,end,ref,alt,eaf,info,beta,se,p,p_i,p_ni,n]
+                    annotation_list = [chr,start,str(end),ref,alt,eaf,info,beta,se,p,p_i,p_ni,n]
                 elif gwas_type == 'fraca':
                     a1freq = content[0]
                     info = content[1]
@@ -146,7 +146,7 @@ def main():
                     p_i = content[8]
                     p_ni = content[9]
                     n = content[10]
-                    annotation_list = [chr,start,end,ref,alt,a1freq,info,logor,logor_se,OR,l95,u95,p,p_i,p_ni,n]
+                    annotation_list = [chr,start,str(end),ref,alt,a1freq,info,logor,logor_se,OR,l95,u95,p,p_i,p_ni,n]
                 annotation = '\t'
                 annotation = annotation.join(annotation_list)
                 wfile.write(annotation + '\n')
