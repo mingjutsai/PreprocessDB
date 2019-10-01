@@ -103,10 +103,13 @@ def main():
         print('output:' + output)
         wfile = open(output,'w')
         if gwas_type == 'bmd':
-           header_list = ['EAF','INFO','BETA','SE','P','P.I','P.NI','N']
+           header_list = ['EAF_GEFOS2018_Bmd','INFO_GEFOS2018_Bmd','BETA_GEFOS2018_Bmd','SE_GEFOS2018_Bmd',
+           'P_GEFOS2018_Bmd','P.I_GEFOS2018_Bmd','P.NI_GEFOS2018_Bmd','N_GEFOS2018_Bmd']
            header = '\t'
         elif gwas_type == 'fraca':
-            header_list = ['A1FREQ','INFO','logOR','logOR.SE','OR','L95','U95','P','P.I','P.NI','N']
+            header_list = ['A1FREQ_GEFOS2018_FracA','INFO_GEFOS2018_FracA','logOR_GEFOS2018_FracA',
+            'logOR.SE_GEFOS2018_FracA','OR_GEFOS2018_FracA','L95_GEFOS2018_FracA','U95_GEFOS2018_FracA',
+            'P_GEFOS2018_FracA','P.I_GEFOS2018_FracA','P.NI_GEFOS2018_FracA','N_GEFOS2018_FracA']
         header = '\t'
         header = header.join(header_list)
         wfile.write('#Chr\tStart\tEnd\tRef\tAlt\t' + header + '\n')
