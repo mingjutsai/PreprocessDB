@@ -1,5 +1,6 @@
 import argparse
 import os
+import re
 # initiate the parser
 def parse_arguments():
     parser = argparse.ArgumentParser(prog='Transfer Gefos data to vcf/annovar format.',
