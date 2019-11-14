@@ -58,20 +58,12 @@ while($line=<CROSSMAP>){
     my $end;
     my $id;
     my $hacer_info;
-    if(($chr ne 'chr1')and($chr ne 'chr2')and($chr ne 'chr3')and($chr ne 'chr4')and($chr ne 'chr5')and($chr ne 'chr6')
-    and($chr ne 'chr7')and($chr ne 'chr8')and($chr ne 'chr9')and($chr ne 'chr10')and($chr ne 'chr11')and($chr ne 'chr12')
-    and($chr ne 'chr13')and($chr ne 'chr14')and($chr ne 'chr15')and($chr ne 'chr16')and($chr ne 'chr17')and($chr ne 'chr18')
-    and($chr ne 'chr19')and($chr ne 'chr20')and($chr ne 'chr21')and($chr ne 'chr22')and($chr ne 'chrX')and($chr ne 'chrY')
-    and($chr ne 'chrM')){
-        next;
-    }else{
-        $start = $ele[1];
-        $end = $ele[2];
-        $id = $ele[3];
-        if($hacer_mapping{$id}){
-            $hacer_info = $hacer_mapping{$id};
-            print OUT $chr."\t".$start."\t".$end."\t".$id."\t".$hacer_info."\n";
-        }
+    $start = $ele[1];
+    $end = $ele[2];
+    $id = $ele[3];
+    if($hacer_mapping{$id}){
+        $hacer_info = $hacer_mapping{$id};
+        print OUT $chr."\t".$start."\t".$end."\t".$id."\t".$hacer_info."\n";
     }
 }
 close CROSSMAP;
