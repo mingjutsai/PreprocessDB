@@ -35,7 +35,7 @@ while($line=<HACER>){
     my $density = $ele[19];
     my $info = $FANTOM5."\t".$VISTA."\t".$Ensembl."\t".$Encode."\t".$ChromHMM."\t";
     $info .= $associated_gene_FANTOM5."\t".$associated_gene_50kb."\t".$associated_gene_4DGenome."\t";
-    $info .= $cell_tissue_gene."\t".$Detection_method."\t".$PMID."\t".$closest_gene."\t".$distance;
+    $info .= $cell_tissue_gene."\t".$Detection_method."\t".$PMID."\t".$closest_gene."\t".$distance."\t";
     $info .= $Technique_enhancer."\t".$celltype_enhancer."\t".$source_enhancer."\t".$Normalized_count."\t".$density;
     $hacer_mapping{$id} = $info;
 }
