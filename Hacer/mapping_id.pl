@@ -70,7 +70,7 @@ while($line=<CROSSMAP>){
         $id = $ele[3];
         if($hacer_mapping{$id}){
             $hacer_info = $hacer_mapping{$id};
-            print OUT $hacer_info."\n";
+            print OUT $chr."\t".$start."\t".$end."\t".$id."\t".$hacer_info."\n";
         }
     }
 }
