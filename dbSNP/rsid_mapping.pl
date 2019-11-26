@@ -15,7 +15,7 @@ while($line=<DBSNP>){
 }
 close DBSNP;
 
-my $out1 = $input1."_hg38.vcf";
+my $out1 = $input1."_hg38_mapping_txt";
 open OUT1,">",$out1;
 open IN1,"<",$input1;
 $line=<IN1>;
@@ -23,14 +23,16 @@ print OUT1 $line;
 while($line=<IN1>){
     chomp $line;
     my @ele = split(/\t/,$line);
-    my $rsid = $ele[2];
-    my $pos = $rsid{$rsid};
-    print OUT1 $pos."\t".$ele[5]."\t".$ele[6]."\t".$ele[7]."\t".$ele[8]."\n";
+    my $rsid = $ele[5];
+    if($rsid{$rsid}){
+        my $pos = $rsid{$rsid};
+        print OUT1 $pos."\t".$ele[6]."\t".$ele[7]."\t".$ele[8]."\t".$ele[9]."\n";
+    }
 }
 close IN1;
 close OUT1;
 
-my $out2 = $input2."_hg38.vcf";
+my $out2 = $input2."_hg38_mapping.txt";
 open OUT2,">",$out2;
 open IN2,"<",$input2;
 $line=<IN2>;
@@ -38,9 +40,11 @@ print OUT2 $line;
 while($line=<IN2>){
     chomp $line;
     my @ele = split(/\t/,$line);
-    my $rsid = $ele[2];
-    my $pos = $rsid{$rsid};
-    print OUT2 $pos."\t".$ele[5]."\t".$ele[6]."\t".$ele[7]."\t".$ele[8]."\n";
+    my $rsid = $ele[5];
+    if($rsid{$rsid}){
+        my $pos = $rsid{$rsid};
+        print OUT2 $pos."\t".$ele[6]."\t".$ele[7]."\t".$ele[8]."\t".$ele[9]."\n";
+    }
 }
 close IN2;
 close OUT2;

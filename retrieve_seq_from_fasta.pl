@@ -48,6 +48,7 @@ if (not defined $addchr) {
 
 my ($allregion, $allchr, $sorted_region) = readAllRegion ($regionfile, $format);
 my (%allele1,%allele2,%info);
+my $region_no = 0;
 open REGION,"<",$regionfile;
 while(my $line=<REGION>){
 	chomp $line;
@@ -56,7 +57,7 @@ while(my $line=<REGION>){
 		next;
 	}
 	my @ele = split(/\t/,$line);
-	my $pos = $ele[0].":".$ele[1]."-".$ele[2];
+	my $pos = $ele[0].":".$ele[1]."-".$ele[2]."_".$region_no;
 	$allele1{$pos} = $ele[3];
 	$allele2{$pos} = $ele[4];
 	my $col_no = scalar @ele;
@@ -68,6 +69,7 @@ while(my $line=<REGION>){
 		$anno_info =~ s/\t$//;
 		$info{$pos} = $anno_info;
 	}
+	$region_no++;
 }
 close REGION;
 my %seqhash;				#database sequence for each chromosome
@@ -77,7 +79,8 @@ my ($count_success, @failure) = (0);
 for my $curchr (sort keys %$allchr) {
 	my ($seqid, $curseq) = ('', '');
 	my $fastafile;
-	
+	print STDERR "curchr:".$curchr."\n";
+	#print STDERR "seqfile:".$seqfile."\n";	
 	if ($seqfile) {			#if the user specify the actual sequence file, the program will read directly from this file
 		$fastafile = $seqfile;
 	} else {			#otherwise, the program will read from chr1.fa, chr2.fa, chr3.fa, etc.
@@ -85,6 +88,7 @@ for my $curchr (sort keys %$allchr) {
 		
 		if ($curchr =~ m/^chr/) {
 			$fastafile = File::Spec->catfile($seqdir, "$curchr.fa");		#by default, all FASTA files should be saved at fastadir, with the same name
+			#print STDERR "fastafile:".$fastafile."\n";
 		} else {
 			$fastafile = File::Spec->catfile($seqdir, "chr$curchr.fa");
 		}
@@ -109,6 +113,7 @@ for my $curchr (sort keys %$allchr) {
 			print STDERR "WARNING: the FASTA file $curchr.fa cannot be retrieved from the specified directory $seqdir. Sequences in this chromosome will not be processed\n";
 			next;
 		}
+		print STDERR "fastafile:".$fastafile."\n";
 	}
 	
 	if (not %seqhash) {
@@ -187,7 +192,7 @@ for my $curchr (sort keys %$allchr) {
 for my $i (0 .. @$sorted_region-1) {
 	my ($name, $exonpos) = @{$sorted_region->[$i]};
 	if (not $name_seq{$name, $exonpos}) {
-		print STDERR "WARNING: Cannot identify sequence for $name (starting from $exonpos)\n";
+		print STDERR "WARNING: Cannot identify sequence for $name (starting from $exonpos)\n";die;
 		next;
 	}
 	
@@ -198,12 +203,13 @@ for my $i (0 .. @$sorted_region-1) {
 		my $start = $ele[1];
 		my $end = $ele[2];
 		my $alt;
-		if($allele1{$name} eq $ref){
-			$alt = $allele2{$name};
-		}elsif($allele2{$name} eq $ref){
-			$alt = $allele1{$name};
+		my $allele_pos = $name."_".$i;
+		if($allele1{$allele_pos} eq $ref){
+			$alt = $allele2{$allele_pos};
+		}elsif($allele2{$allele_pos} eq $ref){
+			$alt = $allele1{$allele_pos};
 		}
-		print $chr."\t".$start."\t".$end."\t".$ref."\t".$alt."\t".$info{$name}."\n";
+		print $chr."\t".$start."\t".$end."\t".$ref."\t".$alt."\t".$info{$allele_pos}."\n";
 		#print $name, "\t", $name, "\t", $exonpos, "\t", $name_seq{$name, $exonpos}, "\n";
 	} else {
 		print ">$name ", $discordlen{$name}?"Warning: $name occur more than once in file with discordant length. ":" ", $badorf{$name, $exonpos}?"Warning: this coding transcript does not have correct ORF annotation. ":" ", 

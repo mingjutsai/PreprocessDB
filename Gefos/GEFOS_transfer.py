@@ -49,6 +49,8 @@ def main():
                 continue
             rsid = fields[1]
             chr = fields[2]
+            if chr == '23':
+                chr = 'X'
             pos = fields[3]
             ref = fields[4]
             alt = fields[5]
@@ -123,6 +125,8 @@ def main():
             else:
                 content = fields[8].split(':')
                 chr = fields[0]
+                if chr == '23':
+                    chr = 'X'
                 start = fields[1]
                 ref = fields[3]
                 alt = fields[4]
