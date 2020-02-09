@@ -58,6 +58,7 @@ while(my $line=<REGION>){
 	}
 	my @ele = split(/\t/,$line);
 	my $pos = $ele[0].":".$ele[1]."-".$ele[2]."_".$region_no;
+	#print STDERR $pos."\n";
 	$allele1{$pos} = $ele[3];
 	$allele2{$pos} = $ele[4];
 	my $col_no = scalar @ele;
@@ -188,11 +189,12 @@ for my $curchr (sort keys %$allchr) {
 		}
 	}
 }
-
+my $unmatch = $regionfile."_unmatch";
+open UN,">",$unmatch;
 for my $i (0 .. @$sorted_region-1) {
 	my ($name, $exonpos) = @{$sorted_region->[$i]};
 	if (not $name_seq{$name, $exonpos}) {
-		print STDERR "WARNING: Cannot identify sequence for $name (starting from $exonpos)\n";die;
+		print STDERR "WARNING: Cannot identify sequence for $name (starting from $exonpos)\n";
 		next;
 	}
 	
@@ -208,6 +210,11 @@ for my $i (0 .. @$sorted_region-1) {
 			$alt = $allele2{$allele_pos};
 		}elsif($allele2{$allele_pos} eq $ref){
 			$alt = $allele1{$allele_pos};
+		}else{
+		    print UN $allele_pos."\tref:".$ref."\t";
+		    print UN "allele1:".$allele1{$allele_pos}."\t";
+		    print UN "allele2:".$allele2{$allele_pos}."\n";
+		    next;
 		}
 		print $chr."\t".$start."\t".$end."\t".$ref."\t".$alt."\t".$info{$allele_pos}."\n";
 		#print $name, "\t", $name, "\t", $exonpos, "\t", $name_seq{$name, $exonpos}, "\n";
@@ -217,7 +224,7 @@ for my $i (0 .. @$sorted_region-1) {
 			$name_seq{$name, $exonpos}, "\n";
 	}
 }
-	
+close UN;	
 	
 
 print STDERR "NOTICE: Finished writting FASTA for $count_success genomic regions to $outfile\n";
