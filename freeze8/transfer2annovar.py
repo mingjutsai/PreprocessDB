@@ -25,7 +25,7 @@ def main():
         clean_line = line.rstrip('\r\n')
         fields = clean_line.split(' ')
         chr = fields[0].replace('chr', '')
-        print(f'{chr},{fields[2]},{fields[3]},{fields[4]},{fields[6]}')
+        #print(f'{chr},{fields[2]},{fields[3]},{fields[4]},{fields[6]}')
         start = int(fields[2])
         rsid = fields[3]
         ref = fields[4]
