@@ -35,6 +35,8 @@ def main():
         count += 1
 
     print(f'Finish the transfer {count} variants')
+    r_input_file.close()
+    o_output_file.close()
 
 if __name__ == "__main__":
     main()
