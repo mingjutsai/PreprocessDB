@@ -122,6 +122,8 @@ def main():
         count += 1
     
     print(f'finish {count} variants')
+    o_output_file.close()
+    r_input_file.close()
 
 
 if __name__ == "__main__":
