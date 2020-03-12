@@ -26,8 +26,8 @@ if (@ARGV < 4){
 if(($db ne "ensGene")and($db ne "refGene")and($db ne "ccdsGene")and($db ne "knownGene")and($db ne "genericGene")){
 	print STDERR "db is error\n";die;
 }
-
-$output = "hg".$build."_".$db."Mrna.fa";
+my $output_dir = dirname($genefile);
+$output = $output_dir."/hg".$build."_".$db."Mrna.fa";
 $command = "perl $retrieve_seq -format $db -seqdir $seq_path -outfile $output $genefile";
 print STDERR "$command\n";
 `$command`;
