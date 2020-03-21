@@ -14,18 +14,22 @@ while(my $line=<IN>){
         next;
     }
     my @ele = split(/\t/,$line);
+    my $chr = $ele[5];
+    #if($chr eq '23'){
+    #	$chr = 'X'
+    #}
     my $start = $ele[1];
     my $end = $ele[2];
     if($start =~ /e+/){
        $start = $end; 
-       print STDERR $ele[0]."\t".$start."\t".$end."\t".$ele[3]."\t".$ele[4]."\n";
-       my $no = scalar @ele;
-       $line = $ele[0]."\t".$start."\t";
-       for(my $i=2; $i<$no; $i++){
-           $line .= $ele[$i]."\t";
-       }
-       $line =~ s/\t$//;
+       print STDERR $chr."\t".$start."\t".$end."\t".$ele[3]."\t".$ele[4]."\n";
+    }  
+    my $no = scalar @ele;
+    $line = $chr."\t".$start."\t";
+    for(my $i=2; $i<$no; $i++){
+       $line .= $ele[$i]."\t";
     }
+    $line =~ s/\t$//;
     print OUT $line."\n";
 }
 close IN;
