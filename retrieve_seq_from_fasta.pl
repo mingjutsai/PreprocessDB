@@ -11,11 +11,21 @@ our $AUTHOR =	'$Author: Kai Wang <kaichop@gmail.com> $';
 
 our ($verbose, $help, $man);
 our ($regionfile);
+our ($print_type);
 our ($outfile, $format, $seqdir, $seqfile, $tabout, $altchr, $addchr);
 our $localtime = localtime;
 
-GetOptions('verbose'=>\$verbose, 'help|h'=>\$help, 'man'=>\$man, 'outfile=s'=>\$outfile, 'format=s'=>\$format, 'seqdir=s'=>\$seqdir, 'seqfile=s'=>\$seqfile,
-	'tabout'=>\$tabout, 'altchr'=>\$altchr, 'addchr!'=>\$addchr) or pod2usage ();
+GetOptions('verbose'=>\$verbose,
+         'help|h'=>\$help, 
+	 'man'=>\$man, 
+	 'outfile=s'=>\$outfile, 
+	 'format=s'=>\$format, 
+	 'seqdir=s'=>\$seqdir, 
+	 'seqfile=s'=>\$seqfile,
+	 'tabout'=>\$tabout, 
+	 'altchr'=>\$altchr,
+	 'print'=>\$print_type, 
+	 'addchr!'=>\$addchr) or pod2usage ();
 
 $help and pod2usage (-verbose=>1, -exitval=>1, -output=>\*STDOUT);
 $man and pod2usage (-verbose=>2, -exitval=>1, -output=>\*STDOUT);
@@ -39,7 +49,13 @@ if (not defined $outfile) {
 if ($outfile ne 'stdout') {
 	open (STDOUT, ">$outfile") or die "Error: cannot write to output file $outfile: $!\n";
 }
-
+if (not defined $print_type) {
+        $print_type = 'full';
+}else {
+        if(($print_type ne 'full')and($print_type ne 'filter')){
+	    print STDERR "print type is error <full or filter>\n";die;
+	}
+}
 $format =~ m/^(refGene|knownGene|ensGene|genericGene|tab|simple)$/ or pod2usage ("Error in argument: the --format argument can be only 'refGene', 'knownGene', 'ensGene', 'genericGene', 'tab' or 'simple'");
 
 if (not defined $addchr) {
@@ -195,7 +211,13 @@ for my $i (0 .. @$sorted_region-1) {
 	my ($name, $exonpos) = @{$sorted_region->[$i]};
 	if (not $name_seq{$name, $exonpos}) {
 		print STDERR "WARNING: Cannot identify sequence for $name (starting from $exonpos)\n";
-		next;
+		if($print_type eq 'filter'){
+		    next;
+		}else{
+		    print STDERR "name:".$name."\texonpos:".$exonpos."\n";
+		    my $allele_pos = $name."_".$i;
+		    $name_seq{$name, $exonpos} = $allele1{$allele_pos};
+		}
 	}
 	
 	if ($tabout) {
@@ -214,7 +236,11 @@ for my $i (0 .. @$sorted_region-1) {
 		    print UN $allele_pos."\tref:".$ref."\t";
 		    print UN "allele1:".$allele1{$allele_pos}."\t";
 		    print UN "allele2:".$allele2{$allele_pos}."\n";
-		    next;
+		    if ($print_type eq 'filter'){
+		        next;
+		    }else{
+			$alt = $allele1{$allele_pos};
+		    }
 		}
 		print $chr."\t".$start."\t".$end."\t".$ref."\t".$alt."\t".$info{$allele_pos}."\n";
 		#print $name, "\t", $name, "\t", $exonpos, "\t", $name_seq{$name, $exonpos}, "\n";
@@ -422,14 +448,16 @@ sub readAllRegion {
  	    --tabout			use tab-delimited output (default is FASTA file)
  	    --altchr			process alternative haplotype chromosome (default: OFF)
  	    --[no]addchr		add chr prefix to region specification (default: ON)
-
- Function: reformat sequences at specific genomic positions from whole-genome FASTA files
+            --print                     <full, filter>print full content or filter content
+ Function: 1) reformat sequences at specific genomic positions from whole-genome FASTA files
+           2) check the annovar ref is correct or not from whole-genome FASTA files
 
  Example: retrieve_seq_from_fasta.pl -format tab -seqdir humandb/ region.tabinput
  	  retrieve_seq_from_fasta.pl -format tab -seqfile chrall.fa region.tabinput
           retrieve_seq_from_fasta.pl -format simple -seqdir humandb/ region.input
           retrieve_seq_from_fasta.pl -format refGene -seqdir humandb hg18_refGenet.txt
           retrieve_seq_from_fasta.pl -format genericGene -seqdir humandb/ hg18_gencodeGene.txt
+          retrieve_seq_from_fasta.pl -format tab -seqdir humandb/ -tabout region.tabinput
 
  Version:$Date: 2018-04-16 00:48:07 -0400 (Mon, 16 Apr 2018) $
 
