@@ -59,8 +59,11 @@ while($line=<IN>){
         $ans = 'TP';
     }elsif(($clinvar eq "Benign/Likely_benign")or($clinvar eq "Likely_benign")or($clinvar eq "Benign/Likely_benign,_other")or($clinvar eq "Benign")or($clinvar eq "Likely_benign,_other")){
         $ans = 'TN';
+    }else{
+        next;
     }
-    if($clinvar eq 'TN'){
+    #print STDERR $ans."\n";
+    if($ans eq 'TN'){
         $clinvar_tn++;
         #metasvm
         if($svm eq 'T'){
@@ -110,7 +113,7 @@ while($line=<IN>){
         }else{
             $add_undefined++;
         }
-    }elsif($clinvar eq 'TP'){
+    }else{#TP
         $clinvar_tp++;
         #metasvm
         if($svm eq 'T'){
