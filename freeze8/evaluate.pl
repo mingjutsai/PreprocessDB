@@ -204,37 +204,40 @@ my $add_total = $add_tn+$add_tp+$add_fn+$add_fp;
 my $add_acc = ($add_tp+$add_tn)/$add_total;
 my $add_cov = $add_total/$clinvar_total;
 
-print STDERR "====MetaSVM====";
+print STDERR "====MetaSVM====\n";
 print STDERR "Sen:".$svm_sen."\n";
 print STDERR "Spe:".$svm_spe."\n";
 print STDERR "Acc:".$svm_acc."\n";
 print STDERR "Cov:".$svm_cov."\n";
 
-print STDERR "====MetaLR====";
+print STDERR "====MetaLR====\n";
 print STDERR "Sen:".$lr_sen."\n";
 print STDERR "Spe:".$lr_spe."\n";
 print STDERR "Acc:".$lr_acc."\n";
 print STDERR "Cov:".$lr_cov."\n";
 
-print STDERR "====CADD====";
+print STDERR "====CADD====\n";
 print STDERR "Sen:".$cadd_sen."\n";
 print STDERR "Spe:".$cadd_spe."\n";
 print STDERR "Acc:".$cadd_acc."\n";
 print STDERR "Cov:".$cadd_cov."\n";
+print STDERR "TP:".$cadd_fp."\n";
 
-print STDERR "====REVEL====";
+print STDERR "====REVEL====\n";
 print STDERR "Sen:".$revel_sen."\n";
 print STDERR "Spe:".$revel_spe."\n";
 print STDERR "Acc:".$revel_acc."\n";
 print STDERR "Cov:".$revel_cov."\n";
 
-print STDERR "====ADD====";
+print STDERR "====ADD====\n";
 print STDERR "Sen:".$add_sen."\n";
 print STDERR "Spe:".$add_spe."\n";
 print STDERR "Acc:".$add_acc."\n";
 print STDERR "Cov:".$add_cov."\n";
+print STDERR "TP:".$add_tp."\n";
 
-print STDERR "====OR====";
+
+print STDERR "====OR====\n";
 print STDERR "Sen:".$or_sen."\n";
 print STDERR "Spe:".$or_spe."\n";
 print STDERR "Acc:".$or_acc."\n";
