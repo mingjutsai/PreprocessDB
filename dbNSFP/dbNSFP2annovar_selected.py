@@ -44,15 +44,23 @@ def main():
         #MetaSVM_pred:70
         #MetaLR_pred:73
         revel_score = fields[78]
-        if revel_score >= 0.5:
-            revel_pred = 'D'
+        if revel_score == '.':
+            revel_pred = '.'
         else:
-            revel_pred = 'T'
+            revel_score = float(fields[78])
+            if revel_score >= 0.5:
+                revel_pred = 'D'
+            else:
+                revel_pred = 'T'
         cadd_score = fields[101]
-        if cadd_score >= 30:
-            cadd_pred = 'D'
+        if cadd_score == '.':
+            cadd_pred = '.'
         else:
-            cadd_pred = 'T'
+            cadd_score = float(fields[101])
+            if cadd_score >= 30:
+                cadd_pred = 'D'
+            else:
+                cadd_pred = 'T'
         info += [cadd_pred,revel_pred]
         scores_info = tab.join(info)
         o_output_file.write(f'{scores_info}\n')
