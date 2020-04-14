@@ -57,7 +57,7 @@ def main():
             cadd_pred = '.'
         else:
             cadd_score = float(fields[101])
-            if cadd_score >= 30:
+            if cadd_score >= 10:
                 cadd_pred = 'D'
             else:
                 cadd_pred = 'T'
