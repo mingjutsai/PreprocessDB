@@ -14,7 +14,7 @@ def main():
     args = parse_arguments()
     if os.path.exists(args.input[0]):
         input_file = args.input[0]
-        output_file = input_file + '_annovar'
+        output_file = input_file + '_annovar_ensembl_scores'
         print(f'input file is {input_file}, output file is {output_file}')
     else:
         raise Exception('input file is not exist')
