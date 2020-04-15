@@ -29,6 +29,7 @@ def main():
 
     r_input_file = open(input_file,'r')
     count = 0
+    CADD_D = 0
     for line in r_input_file:
         clean_line = line.rstrip('\r\n')
         fields = clean_line.split('\t')
@@ -52,13 +53,14 @@ def main():
                 revel_pred = 'D'
             else:
                 revel_pred = 'T'
-        cadd_score = fields[101]
+        cadd_score = fields[104]
         if cadd_score == '.':
             cadd_pred = '.'
         else:
-            cadd_score = float(fields[101])
-            if cadd_score >= 10:
+            cadd_score = float(fields[102])
+            if cadd_score >= 0.5:
                 cadd_pred = 'D'
+                CADD_D += 1
             else:
                 cadd_pred = 'T'
         info += [cadd_pred,revel_pred]
@@ -67,6 +69,7 @@ def main():
         count += 1
     
     print(f'finish {count} variants')
+    print(f'CADD D {CADD_D} variants')
     o_output_file.close()
     r_input_file.close()
 

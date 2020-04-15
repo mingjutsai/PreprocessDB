@@ -98,13 +98,13 @@ while($line=<IN>){
             $revel_undefined++;
         }
         #OR
-        if(($svm eq 'T')or($lr eq 'T')or($cadd eq 'T')or($revel eq 'T')){
-            $or_tn++;
-        }elsif(($svm eq 'D')or($lr eq 'D')or($cadd eq 'D')or($revel eq 'D')){
+        if(($svm eq 'D')or($lr eq 'D')or($cadd eq 'D')or($revel eq 'D')){
             $or_fp++;
-        }else{
+        }elsif(($svm eq '.')and($lr eq '.')and($cadd eq '.')and($revel eq '.')){
             $or_undefined++;
-        }
+        }else{
+	    $or_tn++;
+	}
         #ADD
         if(($svm eq 'T')and($lr eq 'T')and($cadd eq 'T')and($revel eq 'T')){
             $add_tn++;
@@ -148,12 +148,13 @@ while($line=<IN>){
             $revel_undefined++;
         }
         #OR
-        if(($svm eq 'T')or($lr eq 'T')or($cadd eq 'T')or($revel eq 'T')){
-            $or_fn++;
-        }elsif(($svm eq 'D')or($lr eq 'D')or($cadd eq 'D')or($revel eq 'D')){
+        if(($svm eq 'D')or($lr eq 'D')or($cadd eq 'D')or($revel eq 'D')){
             $or_tp++;
-        }else{
-            $or_undefined++;
+        }elsif(($svm eq '.')and($lr eq '.')and($cadd eq '.')and($revel eq '.')){
+	    $or_undefined++;
+	}
+	else{
+            $or_fn++;
         }
         #ADD
         if(($svm eq 'T')and($lr eq 'T')and($cadd eq 'T')and($revel eq 'T')){
@@ -173,68 +174,81 @@ my $svm_spe = $svm_tn/($svm_tn+$svm_fp);
 my $svm_total = $svm_tn+$svm_tp+$svm_fn+$svm_fp;
 my $svm_acc = ($svm_tp+$svm_tn)/$svm_total;
 my $svm_cov = $svm_total/$clinvar_total;
+my $svm_mcc = ($svm_tp*$svm_tn-$svm_fp*$svm_fn)/sqrt(($svm_tp+$svm_fp)*($svm_tp+$svm_fn)*($svm_tn+$svm_fp)*($svm_tn+$svm_fn));
 
 my $lr_sen = $lr_tp/($lr_tp+$lr_fn);
 my $lr_spe = $lr_tn/($lr_tn+$lr_fp);
 my $lr_total = $lr_tn+$lr_tp+$lr_fn+$lr_fp;
 my $lr_acc = ($lr_tp+$lr_tn)/$lr_total;
 my $lr_cov = $lr_total/$clinvar_total;
+my $lr_mcc = ($lr_tp*$lr_tn-$lr_fp*$lr_fn)/sqrt(($lr_tp+$lr_fp)*($lr_tp+$lr_fn)*($lr_tn+$lr_fp)*($lr_tn+$lr_fn));
 
 my $cadd_sen = $cadd_tp/($cadd_tp+$cadd_fn);
 my $cadd_spe = $cadd_tn/($cadd_tn+$cadd_fp);
 my $cadd_total = $cadd_tn+$cadd_tp+$cadd_fn+$cadd_fp;
 my $cadd_acc = ($cadd_tp+$cadd_tn)/$cadd_total;
 my $cadd_cov = $cadd_total/$clinvar_total;
+my $cadd_mcc = ($cadd_tp*$cadd_tn-$cadd_fp*$cadd_fn)/sqrt(($cadd_tp+$cadd_fp)*($cadd_tp+$cadd_fn)*($cadd_tn+$cadd_fp)*($cadd_tn+$cadd_fn));
+
 
 my $revel_sen = $revel_tp/($revel_tp+$revel_fn);
 my $revel_spe = $revel_tn/($revel_tn+$revel_fp);
 my $revel_total = $revel_tn+$revel_tp+$revel_fn+$revel_fp;
 my $revel_acc = ($revel_tp+$revel_tn)/$revel_total;
 my $revel_cov = $revel_total/$clinvar_total;
+my $revel_mcc = ($revel_tp*$revel_tn-$revel_fp*$revel_fn)/sqrt(($revel_tp+$revel_fp)*($revel_tp+$revel_fn)*($revel_tn+$revel_fp)*($revel_tn+$revel_fn));
 
 my $or_sen = $or_tp/($or_tp+$or_fn);
 my $or_spe = $or_tn/($or_tn+$or_fp);
 my $or_total = $or_tn+$or_tp+$or_fn+$or_fp;
 my $or_acc = ($or_tp+$or_tn)/$or_total;
 my $or_cov = $or_total/$clinvar_total;
+my $or_mcc = ($or_tp*$or_tn-$or_fp*$or_fn)/sqrt(($or_tp+$or_fp)*($or_tp+$or_fn)*($or_tn+$or_fp)*($or_tn+$or_fn));
+
 
 my $add_sen = $add_tp/($add_tp+$add_fn);
 my $add_spe = $add_tn/($add_tn+$add_fp);
 my $add_total = $add_tn+$add_tp+$add_fn+$add_fp;
 my $add_acc = ($add_tp+$add_tn)/$add_total;
 my $add_cov = $add_total/$clinvar_total;
+my $add_mcc = ($svm_tp*$svm_tn-$svm_fp*$svm_fn)/sqrt(($svm_tp+$svm_fp)*($svm_tp+$svm_fn)*($svm_tn+$svm_fp)*($svm_tn+$svm_fn));
 
+print STDERR "P:".$clinvar_tp."\n";
+print STDERR "N:".$clinvar_tn."\n";
 print STDERR "====MetaSVM====\n";
 print STDERR "Sen:".$svm_sen."\n";
 print STDERR "Spe:".$svm_spe."\n";
 print STDERR "Acc:".$svm_acc."\n";
 print STDERR "Cov:".$svm_cov."\n";
+print STDERR "MCC:".$svm_mcc."\n";
 
 print STDERR "====MetaLR====\n";
 print STDERR "Sen:".$lr_sen."\n";
 print STDERR "Spe:".$lr_spe."\n";
 print STDERR "Acc:".$lr_acc."\n";
 print STDERR "Cov:".$lr_cov."\n";
+print STDERR "MCC:".$lr_mcc."\n";
 
 print STDERR "====CADD====\n";
 print STDERR "Sen:".$cadd_sen."\n";
 print STDERR "Spe:".$cadd_spe."\n";
 print STDERR "Acc:".$cadd_acc."\n";
 print STDERR "Cov:".$cadd_cov."\n";
-print STDERR "TP:".$cadd_fp."\n";
+print STDERR "MCC:".$cadd_mcc."\n";
 
 print STDERR "====REVEL====\n";
 print STDERR "Sen:".$revel_sen."\n";
 print STDERR "Spe:".$revel_spe."\n";
 print STDERR "Acc:".$revel_acc."\n";
 print STDERR "Cov:".$revel_cov."\n";
+print STDERR "MCC:".$revel_mcc."\n";
 
 print STDERR "====ADD====\n";
 print STDERR "Sen:".$add_sen."\n";
 print STDERR "Spe:".$add_spe."\n";
 print STDERR "Acc:".$add_acc."\n";
 print STDERR "Cov:".$add_cov."\n";
-print STDERR "TP:".$add_tp."\n";
+print STDERR "MCC:".$add_mcc."\n";
 
 
 print STDERR "====OR====\n";
@@ -242,6 +256,7 @@ print STDERR "Sen:".$or_sen."\n";
 print STDERR "Spe:".$or_spe."\n";
 print STDERR "Acc:".$or_acc."\n";
 print STDERR "Cov:".$or_cov."\n";
+print STDERR "MCC:".$or_mcc."\n";
 #my @uniq = keys %sig;
 #foreach my $i (@uniq){
 #    print $i."\n";
