@@ -1,6 +1,26 @@
 #!/usr/bin/perl
 use strict;
 use warnings;
+sub performance {
+    my ($TP, $TN, $FP, $FN, $cln_total) = @_;
+    my $Sen = $TP/($TP + $FN);
+    my $Spe = $TN/($TN + $FP);
+    my $total = $TP + $TN + $FN + $FP;
+    my $Acc = ($TP + $TN)/$total;
+    my $coverage = $total/$cln_total;
+    my $Mcc = ($TP*$TN - $FP*$FN)/sqrt(($TP + $FP)*($TP + $FN)*($TN + $FP)*($TN + $FN));
+    print STDERR "TP:".$TP."\tTN:".$TN."\tFP:".$FP."\tFN:".$FN."\n";
+    return ($Sen, $Spe, $Acc, $coverage, $Mcc);
+}
+
+sub print_performance {
+    my ($sen,$spe,$acc,$cov,$mcc) = @_;
+    print STDERR "Sen:".$sen."\n";
+    print STDERR "Spe:".$spe."\n";
+    print STDERR "Acc:".$acc."\n";
+    print STDERR "Cov:".$cov."\n";
+    print STDERR "Mcc:".$mcc."\n";
+}
 my $input = $ARGV[0];
 if(@ARGV < 1){
     print STDERR "perl evaluate.pl annotation\n";die;
@@ -42,6 +62,16 @@ my $or_fp=0;
 my $or_fn=0;
 my $or_undefined=0;
 
+my $vote_tp=0;
+my $vote_tn=0;
+my $vote_fp=0;
+my $vote_fn=0;
+
+my $primate_tp=0;
+my $primate_tn=0;
+my $primate_fp=0;
+my $primate_fn=0;
+
 my $clinvar_tp=0;
 my $clinvar_tn=0;
 open IN,"<",$input;
@@ -53,8 +83,11 @@ while($line=<IN>){
     my $lr = $ele[7];
     my $cadd = $ele[8];
     my $revel = $ele[9];
-    my $clinvar = $ele[10];
+    my $clinvar = $ele[12];
+    my $primate = $ele[10];
     my $ans;
+    my $D_no=0;
+    my $T_no=0;
     if(($clinvar eq "Pathogenic/Likely_pathogenic")or($clinvar eq "Pathogenic")or($clinvar eq "Likely_pathogenic")or($clinvar eq "Pathogenic,_risk_factor")or($clinvar eq "Pathogenic/Likely_pathogenic,_other")or($clinvar eq "Pathogenic,_other")or($clinvar eq "Likely_pathogenic,_risk_factor")){
         $ans = 'TP';
     }elsif(($clinvar eq "Benign/Likely_benign")or($clinvar eq "Likely_benign")or($clinvar eq "Benign/Likely_benign,_other")or($clinvar eq "Benign")or($clinvar eq "Likely_benign,_other")){
@@ -68,37 +101,52 @@ while($line=<IN>){
         #metasvm
         if($svm eq 'T'){
             $svm_tn++;
+	    $T_no++;
         }elsif($svm eq 'D'){
             $svm_fp++;
+	    $D_no++;
         }else{
             $svm_undefined++;
         }
         #metaLR
         if($lr eq 'T'){
             $lr_tn++;
+	    $T_no++;
         }elsif($lr eq 'D'){
             $lr_fp++;
+	    $D_no++;
         }else{
             $lr_undefined++;
         }
         #CADD
         if($cadd eq 'T'){
             $cadd_tn++;
+	    $T_no++;
         }elsif($cadd eq 'D'){
             $cadd_fp++;
+	    $D_no++;
         }else{
             $cadd_undefined++;
         }
         #REVEL
         if($revel eq 'T'){
             $revel_tn++;
+	    $T_no++;
         }elsif($revel eq 'D'){
             $revel_fp++;
+	    $D_no++;
         }else{
             $revel_undefined++;
         }
+	if($primate eq 'T'){
+	   $primate_tn++;
+	   $T_no++;
+	}elsif($primate eq 'D'){
+	   $primate_fp++;
+	   $D_no++;
+	}
         #OR
-        if(($svm eq 'D')or($lr eq 'D')or($cadd eq 'D')or($revel eq 'D')){
+        if(($svm eq 'D')or($lr eq 'D')or($cadd eq 'D')or($revel eq 'D')or($primate eq 'D')){
             $or_fp++;
         }elsif(($svm eq '.')and($lr eq '.')and($cadd eq '.')and($revel eq '.')){
             $or_undefined++;
@@ -106,158 +154,143 @@ while($line=<IN>){
 	    $or_tn++;
 	}
         #ADD
-        if(($svm eq 'T')and($lr eq 'T')and($cadd eq 'T')and($revel eq 'T')){
+        if(($svm eq 'T')and($lr eq 'T')and($cadd eq 'T')and($revel eq 'T')and($primate eq 'T')){
             $add_tn++;
-        }elsif(($svm eq 'D')and($lr eq 'D')and($cadd eq 'D')and($revel eq 'D')){
+        }elsif(($svm eq 'D')and($lr eq 'D')and($cadd eq 'D')and($revel eq 'D')and($primate eq 'D')){
             $add_fp++;
         }else{
             $add_undefined++;
         }
+	#VOTE
+	if($D_no >= 3){
+	    $vote_fp++;
+	}elsif($T_no >= 3){
+	    $vote_tn++;
+	}
     }else{#TP
         $clinvar_tp++;
         #metasvm
         if($svm eq 'T'){
             $svm_fn++;
+	    $T_no++;
         }elsif($svm eq 'D'){
             $svm_tp++;
+	    $D_no++;
         }else{
             $svm_undefined++;
         }
         #metaLR
         if($lr eq 'T'){
             $lr_fn++;
+	    $T_no++;
         }elsif($lr eq 'D'){
             $lr_tp++;
+	    $D_no++
         }else{
             $lr_undefined++;
         }
         #CADD
         if($cadd eq 'T'){
             $cadd_fn++;
+	    $T_no++;
         }elsif($cadd eq 'D'){
             $cadd_tp++;
+	    $D_no++;
         }else{
             $cadd_undefined++;
         }
         #REVEL
         if($revel eq 'T'){
             $revel_fn++;
+	    $T_no++;
         }elsif($revel eq 'D'){
             $revel_tp++;
+	    $D_no++;
         }else{
             $revel_undefined++;
         }
+	#Primate
+	if($primate eq 'T'){
+	    $primate_fn++;
+	    $T_no++;
+	}elsif($primate eq 'D'){
+	    $primate_tp++;
+	    $D_no++;
+	}
         #OR
-        if(($svm eq 'D')or($lr eq 'D')or($cadd eq 'D')or($revel eq 'D')){
+        if(($svm eq 'D')or($lr eq 'D')or($cadd eq 'D')or($revel eq 'D')or($primate eq 'D')){
             $or_tp++;
-        }elsif(($svm eq '.')and($lr eq '.')and($cadd eq '.')and($revel eq '.')){
+        }elsif(($svm eq '.')and($lr eq '.')and($cadd eq '.')and($revel eq '.')and($primate eq '.')){
 	    $or_undefined++;
 	}
 	else{
             $or_fn++;
         }
         #ADD
-        if(($svm eq 'T')and($lr eq 'T')and($cadd eq 'T')and($revel eq 'T')){
+        if(($svm eq 'T')and($lr eq 'T')and($cadd eq 'T')and($revel eq 'T')and($primate eq 'T')){
             $add_fn++;
-        }elsif(($svm eq 'D')and($lr eq 'D')and($cadd eq 'D')and($revel eq 'D')){
+        }elsif(($svm eq 'D')and($lr eq 'D')and($cadd eq 'D')and($revel eq 'D')and($primate eq 'D')){
             $add_tp++;
         }else{
             $add_undefined++;
         }
+	#vote
+	if($T_no >= 3){
+	    $vote_fn++;
+	}elsif($D_no >= 3){
+	    $vote_tp++;
+	}
     }
 }
 close IN;
 my $clinvar_total = $clinvar_tn+$clinvar_tp;
+print STDERR "====MetaSVM====\n";
+my ($svm_sen,$svm_spe,$svm_acc,$svm_cov,$svm_mcc) = performance($svm_tp,$svm_tn,$svm_fp,$svm_fn,$clinvar_total); 
 
-my $svm_sen = $svm_tp/($svm_tp+$svm_fn);
-my $svm_spe = $svm_tn/($svm_tn+$svm_fp);
-my $svm_total = $svm_tn+$svm_tp+$svm_fn+$svm_fp;
-my $svm_acc = ($svm_tp+$svm_tn)/$svm_total;
-my $svm_cov = $svm_total/$clinvar_total;
-my $svm_mcc = ($svm_tp*$svm_tn-$svm_fp*$svm_fn)/sqrt(($svm_tp+$svm_fp)*($svm_tp+$svm_fn)*($svm_tn+$svm_fp)*($svm_tn+$svm_fn));
+print STDERR "====MetaLR====\n";
+my ($lr_sen,$lr_spe,$lr_acc,$lr_cov,$lr_mcc) = performance($lr_tp,$lr_tn,$lr_fp,$lr_fn, $clinvar_total);
 
-my $lr_sen = $lr_tp/($lr_tp+$lr_fn);
-my $lr_spe = $lr_tn/($lr_tn+$lr_fp);
-my $lr_total = $lr_tn+$lr_tp+$lr_fn+$lr_fp;
-my $lr_acc = ($lr_tp+$lr_tn)/$lr_total;
-my $lr_cov = $lr_total/$clinvar_total;
-my $lr_mcc = ($lr_tp*$lr_tn-$lr_fp*$lr_fn)/sqrt(($lr_tp+$lr_fp)*($lr_tp+$lr_fn)*($lr_tn+$lr_fp)*($lr_tn+$lr_fn));
+print STDERR "===CADD===\n";
+my ($cadd_sen,$cadd_spe,$cadd_acc,$cadd_cov,$cadd_mcc) = performance($cadd_tp,$cadd_tn,$cadd_fp,$cadd_fn,$clinvar_total);
 
-my $cadd_sen = $cadd_tp/($cadd_tp+$cadd_fn);
-my $cadd_spe = $cadd_tn/($cadd_tn+$cadd_fp);
-my $cadd_total = $cadd_tn+$cadd_tp+$cadd_fn+$cadd_fp;
-my $cadd_acc = ($cadd_tp+$cadd_tn)/$cadd_total;
-my $cadd_cov = $cadd_total/$clinvar_total;
-my $cadd_mcc = ($cadd_tp*$cadd_tn-$cadd_fp*$cadd_fn)/sqrt(($cadd_tp+$cadd_fp)*($cadd_tp+$cadd_fn)*($cadd_tn+$cadd_fp)*($cadd_tn+$cadd_fn));
+print STDERR "===REVEL===\n";
+my ($revel_sen,$revel_spe,$revel_acc,$revel_cov,$revel_mcc) = performance($revel_tp,$revel_tn,$revel_fp,$revel_fn,$clinvar_total);
 
 
-my $revel_sen = $revel_tp/($revel_tp+$revel_fn);
-my $revel_spe = $revel_tn/($revel_tn+$revel_fp);
-my $revel_total = $revel_tn+$revel_tp+$revel_fn+$revel_fp;
-my $revel_acc = ($revel_tp+$revel_tn)/$revel_total;
-my $revel_cov = $revel_total/$clinvar_total;
-my $revel_mcc = ($revel_tp*$revel_tn-$revel_fp*$revel_fn)/sqrt(($revel_tp+$revel_fp)*($revel_tp+$revel_fn)*($revel_tn+$revel_fp)*($revel_tn+$revel_fn));
+print STDERR "===VEST4===\n";
+my ($primate_sen,$primate_spe,$primate_acc,$primate_cov,$primate_mcc) = performance($primate_tp,$primate_tn,$primate_fp,$primate_fn,$clinvar_total);
 
-my $or_sen = $or_tp/($or_tp+$or_fn);
-my $or_spe = $or_tn/($or_tn+$or_fp);
-my $or_total = $or_tn+$or_tp+$or_fn+$or_fp;
-my $or_acc = ($or_tp+$or_tn)/$or_total;
-my $or_cov = $or_total/$clinvar_total;
-my $or_mcc = ($or_tp*$or_tn-$or_fp*$or_fn)/sqrt(($or_tp+$or_fp)*($or_tp+$or_fn)*($or_tn+$or_fp)*($or_tn+$or_fn));
+print STDERR "====OR====\n";
+my ($or_sen,$or_spe,$or_acc,$or_cov,$or_mcc) = performance($or_tp,$or_tn,$or_fp,$or_fn,$clinvar_total);
 
+print STDERR "===ADD===\n";
+my ($add_sen,$add_spe,$add_acc,$add_cov,$add_mcc) = performance($add_tp,$add_tn,$add_fp,$add_fn,$clinvar_total);
 
-my $add_sen = $add_tp/($add_tp+$add_fn);
-my $add_spe = $add_tn/($add_tn+$add_fp);
-my $add_total = $add_tn+$add_tp+$add_fn+$add_fp;
-my $add_acc = ($add_tp+$add_tn)/$add_total;
-my $add_cov = $add_total/$clinvar_total;
-my $add_mcc = ($svm_tp*$svm_tn-$svm_fp*$svm_fn)/sqrt(($svm_tp+$svm_fp)*($svm_tp+$svm_fn)*($svm_tn+$svm_fp)*($svm_tn+$svm_fn));
+print STDERR "===VOTE===\n";
+my ($vote_sen,$vote_spe,$vote_acc,$vote_cov,$vote_mcc) = performance($vote_tp,$vote_tn,$vote_fp,$vote_fn,$clinvar_total);
 
 print STDERR "P:".$clinvar_tp."\n";
 print STDERR "N:".$clinvar_tn."\n";
 print STDERR "====MetaSVM====\n";
-print STDERR "Sen:".$svm_sen."\n";
-print STDERR "Spe:".$svm_spe."\n";
-print STDERR "Acc:".$svm_acc."\n";
-print STDERR "Cov:".$svm_cov."\n";
-print STDERR "MCC:".$svm_mcc."\n";
+print_performance($svm_sen,$svm_spe,$svm_acc,$svm_cov,$svm_mcc);
 
 print STDERR "====MetaLR====\n";
-print STDERR "Sen:".$lr_sen."\n";
-print STDERR "Spe:".$lr_spe."\n";
-print STDERR "Acc:".$lr_acc."\n";
-print STDERR "Cov:".$lr_cov."\n";
-print STDERR "MCC:".$lr_mcc."\n";
+print_performance($lr_sen,$lr_spe,$lr_acc,$lr_cov,$lr_mcc);
 
 print STDERR "====CADD====\n";
-print STDERR "Sen:".$cadd_sen."\n";
-print STDERR "Spe:".$cadd_spe."\n";
-print STDERR "Acc:".$cadd_acc."\n";
-print STDERR "Cov:".$cadd_cov."\n";
-print STDERR "MCC:".$cadd_mcc."\n";
+print_performance($cadd_sen,$cadd_spe,$cadd_acc,$cadd_cov,$cadd_mcc);
 
 print STDERR "====REVEL====\n";
-print STDERR "Sen:".$revel_sen."\n";
-print STDERR "Spe:".$revel_spe."\n";
-print STDERR "Acc:".$revel_acc."\n";
-print STDERR "Cov:".$revel_cov."\n";
-print STDERR "MCC:".$revel_mcc."\n";
+print_performance($revel_sen,$revel_spe,$revel_acc,$revel_cov,$revel_mcc);
+
+print STDERR "===VEST4===\n";
+print_performance($primate_sen,$primate_spe,$primate_acc,$primate_cov,$primate_mcc);
 
 print STDERR "====ADD====\n";
-print STDERR "Sen:".$add_sen."\n";
-print STDERR "Spe:".$add_spe."\n";
-print STDERR "Acc:".$add_acc."\n";
-print STDERR "Cov:".$add_cov."\n";
-print STDERR "MCC:".$add_mcc."\n";
-
+print_performance($add_sen,$add_spe,$add_acc,$add_cov,$add_mcc);
 
 print STDERR "====OR====\n";
-print STDERR "Sen:".$or_sen."\n";
-print STDERR "Spe:".$or_spe."\n";
-print STDERR "Acc:".$or_acc."\n";
-print STDERR "Cov:".$or_cov."\n";
-print STDERR "MCC:".$or_mcc."\n";
-#my @uniq = keys %sig;
-#foreach my $i (@uniq){
-#    print $i."\n";
-#}
+print_performance($or_sen,$or_spe,$or_acc,$or_cov,$or_mcc);
+
+print STDERR "====VOTE====\n";
+print_performance($vote_sen,$vote_spe,$vote_acc,$vote_cov,$vote_mcc);

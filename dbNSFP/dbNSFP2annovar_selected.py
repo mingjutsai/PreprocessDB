@@ -22,6 +22,8 @@ def main():
     header = ['#Chr','Start','End','Ref','Alt']
     header += ['MetaSVM_pred','MetaLR_pred']
     header += ['CADD_pred','REVEL_pred']
+    header += ['Vest4']
+    header += ['PrimateAI']
     tab = '\t'
     o_output_file = open(output_file, 'w')
     header_info = tab.join(header)
@@ -60,16 +62,25 @@ def main():
             cadd_score = float(fields[102])
             if cadd_score >= 0.5:
                 cadd_pred = 'D'
-                CADD_D += 1
             else:
                 cadd_pred = 'T'
         info += [cadd_pred,revel_pred]
+        vest4_score = fields[67]
+        if vest4_score == '.':
+            vest4_pred = '.'
+        else:
+            vest4_score = float(fields[67])
+            if vest4_score >= 0.5:
+                vest4_pred = 'D'
+            else:
+                vest4_pred = 'T'
+        primateAI_pred = fields[91];
+        info += [vest4_pred,primateAI_pred]
         scores_info = tab.join(info)
         o_output_file.write(f'{scores_info}\n')
         count += 1
     
     print(f'finish {count} variants')
-    print(f'CADD D {CADD_D} variants')
     o_output_file.close()
     r_input_file.close()
 
