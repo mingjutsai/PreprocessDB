@@ -22,9 +22,19 @@ sub print_performance {
     print STDERR "Mcc:".$mcc."\n";
 }
 my $input = $ARGV[0];
-if(@ARGV < 1){
-    print STDERR "perl evaluate.pl annotation\n";die;
+my $threshold = $ARGV[1];
+if(@ARGV < 2){
+    print STDERR "perl evaluate.pl annotation threshold_file\n";die;
 }
+my %cutoff;
+open THR,"<",$threshold;
+while(my $line=<THR>){
+    chomp $line;
+    my @ele = split(/\t/,$line);
+    $cutoff{$ele[0]} = $ele[1];
+}
+close THR;
+
 my %sig;
 my $svm_tp=0;
 my $svm_tn=0;
@@ -50,6 +60,12 @@ my $revel_fp=0;
 my $revel_fn=0;
 my $revel_undefined=0;
 
+my $vest_tp=0;
+my $vest_tn=0;
+my $vest_fp=0;
+my $vest_fn=0;
+my $vest_undefined=0;
+
 my $add_tp=0;
 my $add_tn=0;
 my $add_fp=0;
@@ -66,25 +82,85 @@ my $vote_tp=0;
 my $vote_tn=0;
 my $vote_fp=0;
 my $vote_fn=0;
+my $vote_undefined=0;
 
-my $primate_tp=0;
-my $primate_tn=0;
-my $primate_fp=0;
-my $primate_fn=0;
-
+my $variant_no=0;
 my $clinvar_tp=0;
 my $clinvar_tn=0;
 open IN,"<",$input;
-my $line;
-while($line=<IN>){
+while(my $line=<IN>){
+    if($line =~ /^#/){
+        next;
+    }
     chomp $line;
+    $variant_no++;
     my @ele = split(/\t/,$line);
-    my $svm = $ele[6];
-    my $lr = $ele[7];
-    my $cadd = $ele[8];
-    my $revel = $ele[9];
-    my $clinvar = $ele[12];
-    my $primate = $ele[10];
+    my $cadd_score = $ele[6];
+    my $svm_score = $ele[7];
+    my $lr_score = $ele[8];
+    my $vest_score = $ele[9];
+    my $revel_score = $ele[10];
+
+    #print STDERR "CADD:".$cadd_score."\tSVM:".$svm_score."\tLR:".$lr_score."\tVEST:".$vest_score."\tREVEL:".$revel_score."\n";
+
+    my $svm;
+    my $lr;
+    my $cadd;
+    my $revel;
+    my $vest;
+    if(($svm_score eq '.')or($svm_score eq 'NA')){
+        $svm = 'NA';
+	$svm_undefined++;
+    }
+    elsif($svm_score >= $cutoff{'MetaSVM'}){
+       $svm = 'D';
+    }else{
+       $svm = 'T';
+    }
+
+   if(($lr_score eq '.')or($lr_score eq 'NA')){
+      $lr = 'NA';
+      $lr_undefined++;
+   }
+   elsif($lr_score >= $cutoff{'MetaLR'}){
+       $lr = 'D';
+   }else{
+       $lr = 'T';
+   }
+
+   if(($vest_score eq '.')or($vest_score eq 'NA')){
+       $vest = "NA";
+       $vest_undefined++;
+   }
+   elsif($vest_score >= $cutoff{'VEST'}){
+       $vest = 'D';
+   }else{
+       $vest = 'T';
+   }
+
+   #print STDERR "VEST:".$vest_score."\n";
+   if(($cadd_score eq '.')or($cadd_score eq 'NA')){
+       $cadd = "NA";
+       $cadd_undefined++;
+   }
+   elsif($cadd_score >= $cutoff{'CADD'}){
+       $cadd = 'D';
+   }else{
+       $cadd = 'T';
+   }
+
+   if(($revel_score eq '.')or($revel_score eq 'NA')){
+       $revel = "NA";
+       $revel_undefined++;
+   }
+   elsif($revel_score >= $cutoff{'REVEL'}){
+       $revel = 'D';
+   }else{
+       $revel = 'T';
+   }
+
+
+    my $clinvar = $ele[11];
     my $ans;
     my $D_no=0;
     my $T_no=0;
@@ -105,9 +181,8 @@ while($line=<IN>){
         }elsif($svm eq 'D'){
             $svm_fp++;
 	    $D_no++;
-        }else{
-            $svm_undefined++;
         }
+  
         #metaLR
         if($lr eq 'T'){
             $lr_tn++;
@@ -115,9 +190,8 @@ while($line=<IN>){
         }elsif($lr eq 'D'){
             $lr_fp++;
 	    $D_no++;
-        }else{
-            $lr_undefined++;
         }
+
         #CADD
         if($cadd eq 'T'){
             $cadd_tn++;
@@ -125,9 +199,8 @@ while($line=<IN>){
         }elsif($cadd eq 'D'){
             $cadd_fp++;
 	    $D_no++;
-        }else{
-            $cadd_undefined++;
         }
+
         #REVEL
         if($revel eq 'T'){
             $revel_tn++;
@@ -135,38 +208,48 @@ while($line=<IN>){
         }elsif($revel eq 'D'){
             $revel_fp++;
 	    $D_no++;
-        }else{
-            $revel_undefined++;
         }
-	if($primate eq 'T'){
-	   $primate_tn++;
-	   $T_no++;
-	}elsif($primate eq 'D'){
-	   $primate_fp++;
-	   $D_no++;
+
+	#VEST
+	if($vest eq 'T'){
+	    $vest_tn++;
+	    $T_no++;
+	}elsif($vest eq 'D'){
+	    $vest_fp++;
+	    $D_no++;
 	}
         #OR
-        if(($svm eq 'D')or($lr eq 'D')or($cadd eq 'D')or($revel eq 'D')or($primate eq 'D')){
+        if(($svm eq 'D')or($lr eq 'D')or($cadd eq 'D')or($revel eq 'D')or($vest eq 'D')){
             $or_fp++;
-        }elsif(($svm eq '.')and($lr eq '.')and($cadd eq '.')and($revel eq '.')){
-            $or_undefined++;
+        }elsif(($svm eq 'NA')and($lr eq 'NA')and($cadd eq 'NA')and($revel eq 'NA')and($vest eq 'NA')){
+		#$or_undefined++;
         }else{
 	    $or_tn++;
 	}
         #ADD
-        if(($svm eq 'T')and($lr eq 'T')and($cadd eq 'T')and($revel eq 'T')and($primate eq 'T')){
-            $add_tn++;
-        }elsif(($svm eq 'D')and($lr eq 'D')and($cadd eq 'D')and($revel eq 'D')and($primate eq 'D')){
-            $add_fp++;
-        }else{
-            $add_undefined++;
-        }
+	if(($D_no > 0)and($T_no == 0)){
+	    $add_fp++;
+	}elsif(($T_no > 0)and($D_no == 0)){
+	    $add_tn++;
+	}
+	#if(($svm eq 'T')and($lr eq 'T')and($cadd eq 'T')and($revel eq 'T')and($primate eq 'T')){
+	#    $add_tn++;
+	#}elsif(($svm eq 'D')and($lr eq 'D')and($cadd eq 'D')and($revel eq 'D')and($primate eq 'D')){
+	#    $add_fp++;
+	#}else{
+	#    $add_undefined++;
+	#}
 	#VOTE
-	if($D_no >= 3){
+	if($D_no > $T_no){
 	    $vote_fp++;
-	}elsif($T_no >= 3){
+	}elsif($T_no > $D_no){
 	    $vote_tn++;
 	}
+	#if($D_no >= 3){
+	#    $vote_fp++;
+	#}elsif($T_no >= 3){
+	#    $vote_tn++;
+	#}
     }else{#TP
         $clinvar_tp++;
         #metasvm
@@ -176,9 +259,8 @@ while($line=<IN>){
         }elsif($svm eq 'D'){
             $svm_tp++;
 	    $D_no++;
-        }else{
-            $svm_undefined++;
         }
+
         #metaLR
         if($lr eq 'T'){
             $lr_fn++;
@@ -186,9 +268,8 @@ while($line=<IN>){
         }elsif($lr eq 'D'){
             $lr_tp++;
 	    $D_no++
-        }else{
-            $lr_undefined++;
         }
+
         #CADD
         if($cadd eq 'T'){
             $cadd_fn++;
@@ -196,9 +277,8 @@ while($line=<IN>){
         }elsif($cadd eq 'D'){
             $cadd_tp++;
 	    $D_no++;
-        }else{
-            $cadd_undefined++;
         }
+
         #REVEL
         if($revel eq 'T'){
             $revel_fn++;
@@ -206,40 +286,49 @@ while($line=<IN>){
         }elsif($revel eq 'D'){
             $revel_tp++;
 	    $D_no++;
-        }else{
-            $revel_undefined++;
         }
-	#Primate
-	if($primate eq 'T'){
-	    $primate_fn++;
+
+	#VEST
+	if($vest eq 'T'){
+	    $vest_fn++;
 	    $T_no++;
-	}elsif($primate eq 'D'){
-	    $primate_tp++;
+	}elsif($vest eq 'D'){
+	    $vest_tp++;
 	    $D_no++;
 	}
         #OR
-        if(($svm eq 'D')or($lr eq 'D')or($cadd eq 'D')or($revel eq 'D')or($primate eq 'D')){
+        if(($svm eq 'D')or($lr eq 'D')or($cadd eq 'D')or($revel eq 'D')or($vest eq 'D')){
             $or_tp++;
-        }elsif(($svm eq '.')and($lr eq '.')and($cadd eq '.')and($revel eq '.')and($primate eq '.')){
-	    $or_undefined++;
+        }elsif(($svm eq 'NA')and($lr eq 'NA')and($cadd eq 'NA')and($revel eq 'NA')and($vest eq 'NA')){
+		#$or_undefined++;
 	}
 	else{
             $or_fn++;
         }
         #ADD
-        if(($svm eq 'T')and($lr eq 'T')and($cadd eq 'T')and($revel eq 'T')and($primate eq 'T')){
-            $add_fn++;
-        }elsif(($svm eq 'D')and($lr eq 'D')and($cadd eq 'D')and($revel eq 'D')and($primate eq 'D')){
-            $add_tp++;
-        }else{
-            $add_undefined++;
-        }
+	if(($T_no > 0)and($D_no == 0)){
+	    $add_fn++;
+	}elsif(($D_no > 0)and($T_no == 0)){
+	    $add_tp++;
+	}
+	#if(($svm eq 'T')and($lr eq 'T')and($cadd eq 'T')and($revel eq 'T')and($primate eq 'T')){
+	#    $add_fn++;
+	#}elsif(($svm eq 'D')and($lr eq 'D')and($cadd eq 'D')and($revel eq 'D')and($primate eq 'D')){
+	#    $add_tp++;
+	#}else{
+	#    $add_undefined++;
+	#}
 	#vote
-	if($T_no >= 3){
+	if($T_no > $D_no){
 	    $vote_fn++;
-	}elsif($D_no >= 3){
+	}elsif($D_no > $T_no){
 	    $vote_tp++;
 	}
+	#if($T_no >= 3){
+	#    $vote_fn++;
+	#}elsif($D_no >= 3){
+	#    $vote_tp++;
+	#}
     }
 }
 close IN;
@@ -258,7 +347,7 @@ my ($revel_sen,$revel_spe,$revel_acc,$revel_cov,$revel_mcc) = performance($revel
 
 
 print STDERR "===VEST4===\n";
-my ($primate_sen,$primate_spe,$primate_acc,$primate_cov,$primate_mcc) = performance($primate_tp,$primate_tn,$primate_fp,$primate_fn,$clinvar_total);
+my ($vest_sen,$vest_spe,$vest_acc,$vest_cov,$vest_mcc) = performance($vest_tp,$vest_tn,$vest_fp,$vest_fn,$clinvar_total);
 
 print STDERR "====OR====\n";
 my ($or_sen,$or_spe,$or_acc,$or_cov,$or_mcc) = performance($or_tp,$or_tn,$or_fp,$or_fn,$clinvar_total);
@@ -273,18 +362,29 @@ print STDERR "P:".$clinvar_tp."\n";
 print STDERR "N:".$clinvar_tn."\n";
 print STDERR "====MetaSVM====\n";
 print_performance($svm_sen,$svm_spe,$svm_acc,$svm_cov,$svm_mcc);
+my $all_svm_cov = ($variant_no - $svm_undefined)/$variant_no;
+print STDERR "All Cov:".$all_svm_cov."\n";
 
 print STDERR "====MetaLR====\n";
 print_performance($lr_sen,$lr_spe,$lr_acc,$lr_cov,$lr_mcc);
+my $all_lr_cov = ($variant_no - $lr_undefined)/$variant_no;
+print STDERR "All Cov:".$all_lr_cov."\n";
 
 print STDERR "====CADD====\n";
 print_performance($cadd_sen,$cadd_spe,$cadd_acc,$cadd_cov,$cadd_mcc);
+my $all_cadd_cov = ($variant_no - $cadd_undefined)/$variant_no;
+print STDERR "All Cov:".$all_cadd_cov."\n";
 
 print STDERR "====REVEL====\n";
 print_performance($revel_sen,$revel_spe,$revel_acc,$revel_cov,$revel_mcc);
+my $all_revel_cov = ($variant_no - $revel_undefined)/$variant_no;
+print STDERR "All Cov:".$all_revel_cov."\n";
 
 print STDERR "===VEST4===\n";
-print_performance($primate_sen,$primate_spe,$primate_acc,$primate_cov,$primate_mcc);
+print_performance($vest_sen,$vest_spe,$vest_acc,$vest_cov,$vest_mcc);
+my $all_vest_cov = ($variant_no - $vest_undefined)/$variant_no;
+print STDERR "All Cov:".$all_vest_cov."\n";
+
 
 print STDERR "====ADD====\n";
 print_performance($add_sen,$add_spe,$add_acc,$add_cov,$add_mcc);

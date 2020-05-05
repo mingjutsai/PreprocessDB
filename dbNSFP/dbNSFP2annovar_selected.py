@@ -42,8 +42,26 @@ def main():
         #pos:1
         #ref:2
         #alt:3
-        
-        info += [fields[70],fields[73]]
+        svm_score = fields[68]
+        if svm_score == '.':
+            svm_pred = '.'
+        else:
+            svm_score = float(fields[68])
+            if svm_score >= -0.4775:
+                svm_pred = 'D'
+            else:
+                svm_pred = 'T'
+        lr_score = fields[71]
+        if lr_score == '.':
+            lr_pred = '.'
+        else:
+            lr_score = float(fields[71])
+            if lr_score >= 0.2645:
+                lr_pred = 'D'
+            else:
+                lr_pred = 'T'
+        info += [svm_pred,lr_pred]
+        #info += [fields[70],fields[73]]
         #MetaSVM_pred:70
         #MetaLR_pred:73
         revel_score = fields[78]
@@ -51,7 +69,7 @@ def main():
             revel_pred = '.'
         else:
             revel_score = float(fields[78])
-            if revel_score >= 0.5:
+            if revel_score >= 0.4335:
                 revel_pred = 'D'
             else:
                 revel_pred = 'T'
@@ -70,7 +88,7 @@ def main():
             vest4_pred = '.'
         else:
             vest4_score = float(fields[67])
-            if vest4_score >= 0.5:
+            if vest4_score >= 0.606:
                 vest4_pred = 'D'
             else:
                 vest4_pred = 'T'
