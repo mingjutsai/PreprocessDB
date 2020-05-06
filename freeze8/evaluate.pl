@@ -87,6 +87,8 @@ my $vote_undefined=0;
 my $variant_no=0;
 my $clinvar_tp=0;
 my $clinvar_tn=0;
+
+my %score_confidence;
 open IN,"<",$input;
 while(my $line=<IN>){
     if($line =~ /^#/){
@@ -108,14 +110,18 @@ while(my $line=<IN>){
     my $cadd;
     my $revel;
     my $vest;
+    my $each_D_no=0;
+    my $each_T_no=0;
     if(($svm_score eq '.')or($svm_score eq 'NA')){
         $svm = 'NA';
 	$svm_undefined++;
     }
     elsif($svm_score >= $cutoff{'MetaSVM'}){
        $svm = 'D';
+       $each_D_no++;
     }else{
        $svm = 'T';
+       $each_T_no++;
     }
 
    if(($lr_score eq '.')or($lr_score eq 'NA')){
@@ -124,8 +130,10 @@ while(my $line=<IN>){
    }
    elsif($lr_score >= $cutoff{'MetaLR'}){
        $lr = 'D';
+       $each_D_no++;
    }else{
        $lr = 'T';
+       $each_T_no++;
    }
 
    if(($vest_score eq '.')or($vest_score eq 'NA')){
@@ -134,8 +142,10 @@ while(my $line=<IN>){
    }
    elsif($vest_score >= $cutoff{'VEST'}){
        $vest = 'D';
+       $each_D_no++;
    }else{
        $vest = 'T';
+       $each_T_no++;
    }
 
    #print STDERR "VEST:".$vest_score."\n";
@@ -145,8 +155,10 @@ while(my $line=<IN>){
    }
    elsif($cadd_score >= $cutoff{'CADD'}){
        $cadd = 'D';
+       $each_D_no++;
    }else{
        $cadd = 'T';
+       $each_T_no++;
    }
 
    if(($revel_score eq '.')or($revel_score eq 'NA')){
@@ -155,10 +167,18 @@ while(my $line=<IN>){
    }
    elsif($revel_score >= $cutoff{'REVEL'}){
        $revel = 'D';
+       $each_D_no++;
    }else{
        $revel = 'T';
+       $each_T_no++;
    }
-
+   if($each_D_no > $each_T_no){
+       $score_confidence{$each_D_no}++;
+   }elsif($each_T_no > $each_D_no){
+       $score_confidence{$each_T_no}++;
+   }else{
+       $vote_undefined++;
+   }
 
     my $clinvar = $ele[11];
     my $ans;
@@ -394,3 +414,11 @@ print_performance($or_sen,$or_spe,$or_acc,$or_cov,$or_mcc);
 
 print STDERR "====VOTE====\n";
 print_performance($vote_sen,$vote_spe,$vote_acc,$vote_cov,$vote_mcc);
+my $all_vote_cov = ($variant_no - $vote_undefined)/$variant_no;
+print STDERR "All Cov:".$all_vote_cov."\n";
+
+print STDERR "VOTE distribution\n";
+my @key = keys %score_confidence;
+foreach my $i (@key){
+    print STDERR $i.":".$score_confidence{$i}."\n";
+}
