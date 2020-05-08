@@ -422,3 +422,4 @@ my @key = keys %score_confidence;
 foreach my $i (@key){
     print STDERR $i.":".$score_confidence{$i}."\n";
 }
+print STDERR "Total variant:".$variant_no."\n";
