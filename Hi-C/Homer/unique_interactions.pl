@@ -16,8 +16,8 @@ while(my $line=<BED>){
     if (($interaction eq 'NA')or($gene eq 'NA')){
         next;
     }
-    if($interaction =~ /,/){# multiple interactions
-        my @inter = split(/,/,$interaction);
+    if($interaction =~ /;/){# multiple interactions
+        my @inter = split(/;/,$interaction);
 	foreach my $i (@inter){
 	    $uniq{$i} = $gene; 
 	}
