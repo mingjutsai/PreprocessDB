@@ -1,0 +1,5 @@
+MetaSVM	0
+MetaLR	0.5
+REVEL	0.4
+CADD	20
+VEST	0.5
