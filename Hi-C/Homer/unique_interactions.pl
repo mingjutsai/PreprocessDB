@@ -2,8 +2,9 @@
 use strict;
 use warnings;
 my $bed = $ARGV[0];
+my $db = $ARGV[1]
 if(@ARGV < 1){
-     print STDERR "perl unique_interactions.pl bed\n";die;
+     print STDERR "perl unique_interactions.pl bed Hi-C_sig\n";die;
 }
 my %uniq;
 open BED,"<",$bed;
