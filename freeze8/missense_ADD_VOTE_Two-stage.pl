@@ -15,11 +15,18 @@ while(my $line=<THR>){
 }
 close THR;
 
+my $overlap = 0;
+my $svm_has_no = 0;
+my $twostage_has_no = 0;
+
 my $output = $input."_FinalScores";
 my $damage = $input."_damage";
+my $coding_filter1_no = 0;
+my $coding_filter1_update_no = 0;
+
 open DAMAGE,">",$damage;
 open OUT,">",$output;
-print OUT "#Chr\tStart\tEnd\tRef\tAlt\tADD\tVOTE\tTwo-Stage\tTwo-Stage-index\n";
+print OUT "#Chr\tStart\tEnd\tRef\tAlt\tADD\tVOTE\tCoding_Filter1\tTwo-Stage\tTwo-Stage-index\n";
 open IN,"<",$input;
 while(my $line=<IN>){
     chomp $line;
@@ -129,8 +136,21 @@ while(my $line=<IN>){
 	   $vote = 'T';
 	   $two_step = 'T';
        }
-   } 
-   print OUT $pos."\t".$add."\t".$vote."\t".$two_step."\t".$two_step_index."\n";
+   }
+   if(($svm eq 'D')and($two_step eq 'D')){
+       $overlap++;
+   }elsif(($svm ne 'D')and($two_step eq 'D')){
+       $twostage_has_no++;
+   }elsif(($svm eq 'D')and($two_step ne 'D')){
+       $svm_has_no++;
+   }
+   if($svm eq 'D'){
+       $coding_filter1_no++;
+   }
+   if($two_step eq 'D'){
+       $coding_filter1_update_no++;
+   }
+   print OUT $pos."\t".$add."\t".$vote."\t".$svm."\t".$two_step."\t".$two_step_index."\n";
    if($two_step eq 'D'){
        print DAMAGE $pos."\t".$gene."\n";
    }
@@ -138,3 +158,9 @@ while(my $line=<IN>){
 close IN;
 close OUT;
 close DAMAGE;
+
+print STDERR "coding_filte1(missense):".$coding_filter1_no."\n";
+print STDERR "coding_filter1_update(missense):".$coding_filter1_update_no."\n";
+print STDERR "overlap no:".$overlap."\n";
+print STDERR "Only svm has:".$svm_has_no."\n";
+print STDERR "Only two-stage has:".$twostage_has_no."\n";

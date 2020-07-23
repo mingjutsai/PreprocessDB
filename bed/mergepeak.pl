@@ -21,8 +21,7 @@ foreach my $i (@peaks){
         chomp $line;
 	my @ele = split(/\t/,$line);
         my $pos = $ele[0]."\t".$ele[1]."\t".$ele[2];
-	my $value = $ele[4];
-        my $info = $tmp[1].":".$value;
+        my $info = $tmp[1];
         if(!$peaks{$pos}){
 	    $peaks{$pos} = $info;
 	}else{
@@ -40,6 +39,8 @@ foreach my $i (@peaks){
 open OUT,">",$output;
 my @uniq_region = keys %peaks;
 foreach my $region (@uniq_region){
-    print OUT $region."\t".$peaks{$region}."\n";
+    my ($chr,$start,$end) = split(/\t/,$region);
+    my $pos = $chr."-".$start."-".$end;
+    print OUT $region."\t".$peaks{$region}.":".$pos."\n";
 }
 close OUT;
