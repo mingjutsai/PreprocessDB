@@ -34,7 +34,7 @@ if(!-e $process){
 if(!-e $gene2fa){
 	print STDERR "$gene2fa does not exist\n";die;
 }
-$command = "$gtf2GenePred -genePredExt $gtf $gtf_gene";
+$command = "$gtf2GenePred -genePredExt -geneNameAsName2 $gtf $gtf_gene";
 print STDERR "$command\n";
 `$command`;
 $command = "perl $process $hg2GRCh $gtf_gene";

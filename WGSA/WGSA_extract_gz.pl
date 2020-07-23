@@ -37,9 +37,12 @@ if(($type ne "snp")and($type ne "indel")){
 my $lof_hc = $o_dir."/".$input."_LoF_HC.txt";
 my $inframe = $o_dir."/".$input."_inframe_indel.txt";
 my $synonymous = $o_dir."/".$input."_synonymous.txt";
+my $missense = $o_dir."/".$input."_missense.txt";
+my $metasvm_damage = $o_dir."/".$input."_missense_MetaSVM_Damage.txt";
 my $no = 0;
 my $VEP_ensembl_Consequence_no = 0;
 my $VEP_ensembl_LoF_no = 0;
+my $MetaSVM_pred_no = 0;
 if($input =~ /\.gz$/){
     open(IN, "gunzip -c $input |") || die "can't open pipe to ".$input."\n";
 }else{
@@ -53,6 +56,13 @@ if($type eq "snp"){
 
     open HC,">",$lof_hc;
     print HC $line;
+
+    open MIS,">",$missense;
+    print MIS $line;
+
+    open SVM,">",$metasvm_damage;
+    print SVM $line;
+
 }elsif($type eq "indel"){
    open INFRAME,">",$inframe;
    print INFRAME $line;
@@ -66,10 +76,13 @@ foreach my $i (@ele){
         $VEP_ensembl_LoF_no = $no;
     }elsif($i eq "VEP_ensembl_Consequence"){
         $VEP_ensembl_Consequence_no = $no;
+    }elsif($i eq "MetaSVM_pred"){
+        $MetaSVM_pred_no = $no;
     }
     $no++;
 }
-print STDERR "VEP_ensembl_Lof:".$VEP_ensembl_LoF_no."\tVEP_ensembl_Consequence:".$VEP_ensembl_Consequence_no."\n";
+print STDERR "VEP_ensembl_Lof:".$VEP_ensembl_LoF_no."\tVEP_ensembl_Consequence:".$VEP_ensembl_Consequence_no."\t";
+print STDERR "MetaSVM_Pred:".$MetaSVM_pred_no."\n";
 while($line=<IN>){
     chomp $line;
     #print STDERR $line."\n";
@@ -77,24 +90,33 @@ while($line=<IN>){
     #print STDERR "VEP_ensembl_LoF:".$ele[$VEP_ensembl_LoF_no]."\nVEP_ensembl_Consequence:".$ele[$VEP_ensembl_Consequence_no]."\n";die;
     my $lof = $ele[$VEP_ensembl_LoF_no];
     my $vep_conseq = $ele[$VEP_ensembl_Consequence_no];
+    my $metasvm_result = $ele[$MetaSVM_pred_no];
     if($lof =~ /HC/){
         print HC $line."\n";
     }elsif(($vep_conseq =~ /inframe_insertion/)or($vep_conseq =~ /inframe_deletion/)){
         print INFRAME $line."\n";
     }elsif($vep_conseq =~ /synonymous/){
         print SYN $line."\n";
+    }elsif($vep_conseq =~ /missense_variant/){
+        print MIS $line."\n";
+	if($metasvm_result eq 'D'){
+	    print SVM $line."\n";
+	}
+	#print STDERR $metasvm_result."\n";
     }
 
 }
-CATCH {
-    default {
-        die "Error reading". $input."\n";
-    }
-}
+#CATCH {
+#    default {
+#        die "Error reading". $input."\n";
+#    }
+#}
 close IN;
 if($type eq "snp"){
     close SYN;
     close HC;
+    close MIS;
+    close SVM;
 }elsif($type eq "indel"){
     close INFRAME;
     close HC;

@@ -15,8 +15,8 @@ open ID,"<",$id_list;
 while(my $line=<ID>){
     chomp $line;
     my @ele = split(/\t/,$line);
-    my $id = $ele[0];
-    my $gene = $ele[1];
+    my $id = $ele[1];
+    my $gene = $ele[3];
     $id{$id} = $gene;
 }
 close ID;
