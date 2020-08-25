@@ -84,6 +84,25 @@ my $vote_fp=0;
 my $vote_fn=0;
 my $vote_undefined=0;
 
+my $two_tp=0;
+my $two_tn=0;
+my $two_fp=0;
+my $two_fn=0;
+my $two_undefined=0;
+
+my $svm_tp_no=0;
+my $lr_tp_no=0;
+my $vest_tp_no=0;
+my $cadd_tp_no=0;
+my $revel_tp_no=0;
+
+my $svm_tn_no=0;
+my $lr_tn_no=0;
+my $vest_tn_no=0;
+my $cadd_tn_no=0;
+my $revel_tn_no=0;
+
+
 my $variant_no=0;
 my $clinvar_tp=0;
 my $clinvar_tn=0;
@@ -97,19 +116,23 @@ while(my $line=<IN>){
     chomp $line;
     $variant_no++;
     my @ele = split(/\t/,$line);
+    my @predict_D;
+    my @predict_T;
     my $cadd_score = $ele[6];
     my $svm_score = $ele[7];
     my $lr_score = $ele[8];
     my $vest_score = $ele[9];
     my $revel_score = $ele[10];
-
+    
     #print STDERR "CADD:".$cadd_score."\tSVM:".$svm_score."\tLR:".$lr_score."\tVEST:".$vest_score."\tREVEL:".$revel_score."\n";
-
+    my $add_flag = 0;
+    my $vote_flag = 0;
     my $svm;
     my $lr;
     my $cadd;
     my $revel;
     my $vest;
+    my $two;
     my $each_D_no=0;
     my $each_T_no=0;
     if(($svm_score eq '.')or($svm_score eq 'NA')){
@@ -180,7 +203,7 @@ while(my $line=<IN>){
        $vote_undefined++;
    }
 
-    my $clinvar = $ele[11];
+    my $clinvar = $ele[5];
     my $ans;
     my $D_no=0;
     my $T_no=0;
@@ -198,6 +221,7 @@ while(my $line=<IN>){
         if($svm eq 'T'){
             $svm_tn++;
 	    $T_no++;
+	    $predict_T[0] = 1;
         }elsif($svm eq 'D'){
             $svm_fp++;
 	    $D_no++;
@@ -207,6 +231,7 @@ while(my $line=<IN>){
         if($lr eq 'T'){
             $lr_tn++;
 	    $T_no++;
+	    $predict_T[1] = 1;
         }elsif($lr eq 'D'){
             $lr_fp++;
 	    $D_no++;
@@ -216,6 +241,7 @@ while(my $line=<IN>){
         if($cadd eq 'T'){
             $cadd_tn++;
 	    $T_no++;
+	    $predict_T[3] = 1;
         }elsif($cadd eq 'D'){
             $cadd_fp++;
 	    $D_no++;
@@ -225,6 +251,7 @@ while(my $line=<IN>){
         if($revel eq 'T'){
             $revel_tn++;
 	    $T_no++;
+	    $predict_T[4] = 1;
         }elsif($revel eq 'D'){
             $revel_fp++;
 	    $D_no++;
@@ -234,6 +261,7 @@ while(my $line=<IN>){
 	if($vest eq 'T'){
 	    $vest_tn++;
 	    $T_no++;
+	    $predict_T[2] = 1;
 	}elsif($vest eq 'D'){
 	    $vest_fp++;
 	    $D_no++;
@@ -249,8 +277,10 @@ while(my $line=<IN>){
         #ADD
 	if(($D_no > 0)and($T_no == 0)){
 	    $add_fp++;
+	    $add_flag = 'D';
 	}elsif(($T_no > 0)and($D_no == 0)){
 	    $add_tn++;
+	    $add_flag = 'T';
 	}
 	#if(($svm eq 'T')and($lr eq 'T')and($cadd eq 'T')and($revel eq 'T')and($primate eq 'T')){
 	#    $add_tn++;
@@ -262,8 +292,10 @@ while(my $line=<IN>){
 	#VOTE
 	if($D_no > $T_no){
 	    $vote_fp++;
+	    $vote_flag = 'D';
 	}elsif($T_no > $D_no){
 	    $vote_tn++;
+	    $vote_flag = 'T';
 	}
 	#if($D_no >= 3){
 	#    $vote_fp++;
@@ -278,6 +310,7 @@ while(my $line=<IN>){
 	    $T_no++;
         }elsif($svm eq 'D'){
             $svm_tp++;
+	    $predict_D[0] = 1;
 	    $D_no++;
         }
 
@@ -287,6 +320,7 @@ while(my $line=<IN>){
 	    $T_no++;
         }elsif($lr eq 'D'){
             $lr_tp++;
+	    $predict_D[1] = 1;
 	    $D_no++
         }
 
@@ -296,6 +330,7 @@ while(my $line=<IN>){
 	    $T_no++;
         }elsif($cadd eq 'D'){
             $cadd_tp++;
+	    $predict_D[3] = 1;
 	    $D_no++;
         }
 
@@ -305,6 +340,7 @@ while(my $line=<IN>){
 	    $T_no++;
         }elsif($revel eq 'D'){
             $revel_tp++;
+	    $predict_D[4] = 1;
 	    $D_no++;
         }
 
@@ -314,6 +350,7 @@ while(my $line=<IN>){
 	    $T_no++;
 	}elsif($vest eq 'D'){
 	    $vest_tp++;
+	    $predict_D[2] = 1;
 	    $D_no++;
 	}
         #OR
@@ -328,8 +365,10 @@ while(my $line=<IN>){
         #ADD
 	if(($T_no > 0)and($D_no == 0)){
 	    $add_fn++;
+	    $add_flag = 'T';
 	}elsif(($D_no > 0)and($T_no == 0)){
 	    $add_tp++;
+	    $add_flag = 'D';
 	}
 	#if(($svm eq 'T')and($lr eq 'T')and($cadd eq 'T')and($revel eq 'T')and($primate eq 'T')){
 	#    $add_fn++;
@@ -341,8 +380,10 @@ while(my $line=<IN>){
 	#vote
 	if($T_no > $D_no){
 	    $vote_fn++;
+	    $vote_flag = 'T';
 	}elsif($D_no > $T_no){
 	    $vote_tp++;
+	    $vote_flag = 'D';
 	}
 	#if($T_no >= 3){
 	#    $vote_fn++;
@@ -350,6 +391,58 @@ while(my $line=<IN>){
 	#    $vote_tp++;
 	#}
     }
+    if($add_flag){
+        $two = $add_flag;
+    }elsif($vote_flag){
+        $two = $vote_flag;
+    }else{
+        $two_undefined++;
+    }
+    if($two){
+        if($ans eq 'TN'){
+            if($two eq 'T'){
+                $two_tn++;
+		if($predict_T[0]){
+		    $svm_tn_no++;
+		}
+		if($predict_T[1]){
+		    $lr_tn_no++;
+		}
+		if($predict_T[2]){
+		    $vest_tn_no++;
+		}
+		if($predict_T[3]){
+		    $cadd_tn_no++;
+		}
+		if($predict_T[4]){
+		    $revel_tn_no++;
+		}
+            }elsif($two eq 'D'){
+                $two_fp++;
+            }
+        }else{
+            if($two eq 'T'){
+	        $two_fn++;
+	    }elsif($two eq 'D'){
+	        $two_tp++;
+		if($predict_D[0]){
+                    $svm_tp_no++;
+                }
+                if($predict_D[1]){
+                    $lr_tp_no++;
+                }
+                if($predict_D[2]){
+                    $vest_tp_no++;
+                }
+                if($predict_D[3]){
+                    $cadd_tp_no++;
+                }
+                if($predict_D[4]){
+                    $revel_tp_no++;
+                }
+	    }
+        }
+    }#two
 }
 close IN;
 my $clinvar_total = $clinvar_tn+$clinvar_tp;
@@ -377,6 +470,9 @@ my ($add_sen,$add_spe,$add_acc,$add_cov,$add_mcc) = performance($add_tp,$add_tn,
 
 print STDERR "===VOTE===\n";
 my ($vote_sen,$vote_spe,$vote_acc,$vote_cov,$vote_mcc) = performance($vote_tp,$vote_tn,$vote_fp,$vote_fn,$clinvar_total);
+
+print STDERR "===TWO===\n";
+my ($two_sen,$two_spe,$two_acc,$two_cov,$two_mcc) = performance($two_tp,$two_tn,$two_fp,$two_fn,$clinvar_total);
 
 print STDERR "P:".$clinvar_tp."\n";
 print STDERR "N:".$clinvar_tn."\n";
@@ -417,9 +513,25 @@ print_performance($vote_sen,$vote_spe,$vote_acc,$vote_cov,$vote_mcc);
 my $all_vote_cov = ($variant_no - $vote_undefined)/$variant_no;
 print STDERR "All Cov:".$all_vote_cov."\n";
 
+print STDERR "====TWO====\n";
+print_performance($two_sen,$two_spe,$two_acc,$two_cov,$two_mcc);
+my $all_two_cov = ($variant_no - $two_undefined)/$variant_no;
+print STDERR "All Cov:".$all_vote_cov."\n";
 print STDERR "VOTE distribution\n";
 my @key = keys %score_confidence;
 foreach my $i (@key){
     print STDERR $i.":".$score_confidence{$i}."\n";
 }
 print STDERR "Total variant:".$variant_no."\n";
+
+print STDERR "MetaSVM TP contribute:".$svm_tp_no."\n";
+print STDERR "MetaLR TP contribute:".$lr_tp_no."\n";
+print STDERR "VEST TP contribute:".$vest_tp_no."\n";
+print STDERR "CADD TP contribute:".$cadd_tp_no."\n";
+print STDERR "REVEL TP contribute:".$revel_tp_no."\n";
+
+print STDERR "MetaSVM TN contribute:".$svm_tn_no."\n";
+print STDERR "MetaLR TN contribute:".$lr_tn_no."\n";
+print STDERR "VEST TN contribute:".$vest_tn_no."\n";
+print STDERR "CADD TN contribute:".$cadd_tn_no."\n";
+print STDERR "REVEL TN contribute:".$revel_tn_no."\n";
