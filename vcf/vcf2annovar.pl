@@ -8,7 +8,13 @@ if(@ARGV < 1){
 my $output = $vcf."_annovar";
 open OUT,">",$output;
 print OUT "#Chr\tStart\tEnd\tRef\tAlt\tRSID\n";
-open VCF,"<",$vcf;
+
+if($vcf =~ /\.gz$/){
+    open(VCF, "gunzip -c $vcf |") || die "can't open pipe to ".$vcf."\n";
+}else{
+    open VCF,"<",$vcf;
+}
+
 while(my $line=<VCF>){
     chomp $line;
     if($line =~ /^#/){
