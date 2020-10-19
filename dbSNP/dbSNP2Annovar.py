@@ -1,6 +1,10 @@
 import os
 import argparse
 import re
+import gzip
+def gunzip_bytes_obj(bytes_obj: bytes) -> str:
+        return gzip.decompress(bytes_obj).decode()
+
 def parse_arguments():
     parser = argparse.ArgumentParser(prog='Transfer dbSNP_vcf to Annovar format.',
                                         description='')
@@ -46,11 +50,21 @@ def main():
     file.close
 
     #read
-    rfile = open(dbsnp,'r')
+    if dbsnp.endswith("gz"):
+        rfile = gzip.open(dbsnp, 'rb')
+    else:
+        rfile = open(dbsnp,'r')
+    #rfile = open(dbsnp,'r')
     output = dbsnp + '_annovar'
     wfile = open(output,'w')
     wfile.write('#Chr\tStart\tEnd\tRef\tAlt\tRSID\n')
     for line in rfile:
+        if dbsnp.endswith("gz"):
+            decompress_line = line.decode("utf-8")
+            line = decompress_line
+        #print(line)
+        #print(type(line))
+        #quit()
         clean_line = line.rstrip('\r\n')
         fields = clean_line.split('\t')
         match_header = re.match('^#',fields[0])
