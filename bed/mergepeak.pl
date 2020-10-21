@@ -3,8 +3,9 @@ use strict;
 use warnings;
 my $input = $ARGV[0];
 my $output = $ARGV[1];
-if(@ARGV < 2){
-    print STDERR "perl mergepeak.pl peak1:value1,peak2:value2,peak3:value3 outputfile\n";die;
+my $info_idx = $ARGV[2];
+if(@ARGV < 3){
+    print STDERR "perl mergepeak.pl peak1:value1,peak2:value2,peak3:value3 outputfile info_idx\n";die;
 }
 my @peaks = split(/,/,$input);
 my %peaks;
@@ -20,8 +21,11 @@ foreach my $i (@peaks){
     while(my $line=<$in>){
         chomp $line;
 	my @ele = split(/\t/,$line);
-        my $pos = $ele[0]."\t".$ele[1]."\t".$ele[2];
-        my $info = $tmp[1];
+	my $chr = $ele[0];
+	my $start = $ele[1];
+	my $end = $ele[2];
+        my $pos = $chr."\t".$start."\t".$end;
+        my $info = $tmp[1].":".$ele[$info_idx];
         if(!$peaks{$pos}){
 	    $peaks{$pos} = $info;
 	}else{
