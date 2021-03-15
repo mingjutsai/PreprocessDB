@@ -18,7 +18,7 @@ while(my $line=<IN>){
     if(($chr eq "chr1")or($chr eq "chr2")or($chr eq "chr3")or($chr eq "chr4")or($chr eq "chr5")or($chr eq "chr6")or($chr eq "chr7")or($chr eq "chr8")
      or($chr eq "chr9")or($chr eq "chr10")or($chr eq "chr11")or($chr eq "chr12")or($chr eq "chr13")or($chr eq "chr14")or($chr eq "chr15")
      or($chr eq "chr16")or($chr eq "chr17")or($chr eq "chr18")or($chr eq "chr19")or($chr eq "chr20")or($chr eq "chr21")or($chr eq "chr21")
-     or($chr eq "chr22")or($chr eq "chrX")or($chr eq "chrY")or($chr eq "chrM")){
+     or($chr eq "chr22")or($chr eq "chrX")or($chr eq "chrY")or($chr eq "chrM")or($chr eq "chrMT")){
          if($id eq $old_id){
 	     my $output = "splitChrom/".$input.".".$chr.".gothic";
 	     my $of;
