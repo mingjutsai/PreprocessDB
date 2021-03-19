@@ -1,2 +1,2 @@
 # PreprocessDB
-process some annotation DB
+process the annotation DBs with ANNOVAR format
