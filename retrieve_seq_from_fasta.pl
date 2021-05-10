@@ -228,12 +228,45 @@ for my $i (0 .. @$sorted_region-1) {
 		my $end = $ele[2];
 		my $alt;
 		my $allele_pos = $name."_".$i;
-		if($allele1{$allele_pos} eq $ref){
+		#print STDERR "allele_pos:".$allele_pos."\n";
+		#consider indel first
+		if($allele1{$allele_pos} eq '-'){
+                     $alt = $ref.$allele2{$allele_pos};
+                }elsif($allele2{$allele_pos} eq '-'){
+                     if(length($allele1{$allele_pos}) > 1){
+                          my $a1 = $allele1{$allele_pos};
+                          chop $a1;
+                            #my $last = chop $a1;
+                        if($ref =~ /$a1/){
+                             $alt = substr($ref,0,1);
+                        }
+                    }else{
+                         $ref = $ref.$allele1{$allele_pos};
+                         $alt = substr($ref,0,1);
+                    }
+                }elsif($allele1{$allele_pos} eq $ref){
 			$alt = $allele2{$allele_pos};
 		}elsif($allele2{$allele_pos} eq $ref){
 			$alt = $allele1{$allele_pos};
 		}else{
 		    print UN $allele_pos."\tref:".$ref."\t";
+		    #if($allele1{$allele_pos} eq '-'){
+		    #    $alt = $ref.$allele2{$allele_pos};
+		    #}elsif($allele2{$allele_pos} eq '-'){
+	 	    #	if(length($allele1{$allele_pos}) > 1){
+		    #        my $a1 = $allele1{$allele_pos};
+	            #		    chop $a1;
+		    #	    #my $last = chop $a1;
+		    #	    if($ref =~ /$a1/){
+		    #	        $alt = substr($ref,0,1);
+	            #		    }
+		    #	}else{
+		    #	    $ref = $ref.$allele1{$allele_pos};
+		    #	    $alt = substr($ref,0,1);
+		    #	}
+		    #}
+		    #print UN "updated ref:".$ref."\t";
+		    #print UN "updated alt:".$alt."\t";
 		    print UN "allele1:".$allele1{$allele_pos}."\t";
 		    print UN "allele2:".$allele2{$allele_pos}."\n";
 		    if ($print_type eq 'filter'){
