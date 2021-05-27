@@ -25,8 +25,8 @@ while(my $line=<VCF>){
     $chr =~ s/chr//;
     my $start = $ele[1];
     my $rsid = $ele[2];
-    my $ref = $ele[3];
-    my $alt = $ele[4];
+    my $ref = uc($ele[3]);
+    my $alt = uc($ele[4]);
     my $end = $start + length ($ref) -1;
     print OUT $chr."\t".$start."\t".$end."\t".$ref."\t".$alt."\t".$rsid."\t".$line."\n";
 }
