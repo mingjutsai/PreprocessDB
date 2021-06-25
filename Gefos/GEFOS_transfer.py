@@ -45,7 +45,7 @@ def main():
             clean_line = line.rstrip('\r\n')
             fields = clean_line.split("\t")
             snpid = fields[0]
-            if snpid == 'SNPID':
+            if snpid == 'SNP':
                 continue
             rsid = fields[1]
             chr = fields[2]
