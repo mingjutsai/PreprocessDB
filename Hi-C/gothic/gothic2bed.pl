@@ -26,7 +26,13 @@ while(my $line=<IN>){
     my $bin1_id = $chr_bin1.":".$start_bin1.":".$start_bin2;
     my $bin2_id = $chr_bin2.":".$start_bin2.":".$start_bin1;
     my $readcount = $ele[10];
+    if($readcount < 10){
+        next;
+    }
     my $qvalue = sprintf("%.2e",$ele[12]);
+    if($qvalue > 0.05){
+        next;
+    }
     my $id = $chr_bin1.":".$start_bin1.":".$start_bin2;
     print OUT $bin1_id."\t".$readcount."\t".$qvalue."\n";
     print OUT $bin2_id."\t".$readcount."\t".$qvalue."\n";
