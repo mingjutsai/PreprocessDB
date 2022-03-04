@@ -5,8 +5,7 @@ import re
 def parse_arguments():
     ### define arguments
     str_description = ''
-    str_description += 'FindDock is a batch AutoDock Vina runner for the candidate drugs or a keyword '
-    str_description += 'developed by Yu-Chuan (Chester) Chang & all member of the Genomics Team at AILabs in Taiwan. '
+    str_description += 'generate gcta format from leadSNP locus '
     parser = argparse.ArgumentParser(prog='LeadSNP_gwasLocus', description=str_description)
 
     ### define arguments for I/O
