@@ -1,3 +1,4 @@
+#!/home/mingju/anaconda3/bin/python
 import argparse
 import os
 import re
@@ -5,13 +6,12 @@ import re
 def parse_arguments():
     ### define arguments
     str_description = ''
-    str_description += 'FindDock is a batch AutoDock Vina runner for the candidate drugs or a keyword '
-    str_description += 'developed by Yu-Chuan (Chester) Chang & all member of the Genomics Team at AILabs in Taiwan. '
+    str_description += 'Split GWAS summary to locus. '
     parser = argparse.ArgumentParser(prog='LeadSNP_gwasLocus', description=str_description)
 
     ### define arguments for I/O
-    parser.add_argument("-l", required=True, help="the file of leadSNP")
-    parser.add_argument("-i", required=True, help="the file of gwas_summary")
+    parser.add_argument("-l", required=True, help="the file of leadSNP (from FUMA: GenomicRiskLoci.txt)")
+    parser.add_argument("-i", required=True, help="the file of gwas_summary with .gcta format")
     
     return parser
 
@@ -29,11 +29,11 @@ def main(args=None):
     for line in leadfile:
         clean_line = line.rstrip('\r\n')
         fields = clean_line.split("\t")
-        pos = fields[5]
-        if pos == 'pos':
+        pos = fields[1]
+        if pos == 'Start':
             continue
-        chr = fields[4]
-        rsid = fields[3]
+        chr = fields[0]
+        rsid = fields[6]
         min_pos = int(pos) - 500000
         if min_pos < 0:
             min_pos = 0

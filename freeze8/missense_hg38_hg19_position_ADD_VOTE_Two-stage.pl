@@ -43,7 +43,7 @@ while(my $line=<IN>){
     my @ele = split(/\t/,$line);
     my ($chr,$start,$end,$ref,$alt,$chr_hg19,$start_hg19,$ref_hg19,$alt_hg19,$gene) = ($ele[0],$ele[1],$ele[2],$ele[3],$ele[4],$ele[5],$ele[6],$ele[7],$ele[8],$ele[9]);
     #my $damage_info = join(",",$gene,$chr,$start,$ref,$alt);
-    my $pos = join("\t",$chr,$start,$end,$ref,$alt);
+    my $pos = join("\t",$chr,$start,$ref,$alt);
     my $pos_hg19 = join("\t",$chr_hg19,$start_hg19,$ref_hg19,$alt_hg19);
     my $D_no = 0;
     my $T_no = 0;
@@ -62,12 +62,14 @@ while(my $line=<IN>){
 
     my $revel_score = $ele[14];
     my $revel;
-
+    
+    my $d_methods;
     if(($svm_score eq '.')or($svm_score eq 'NA')){
         $svm = 'NA';
     }
     elsif($svm_score >= $cutoff{'MetaSVM'}){
        $svm = 'D';
+       $d_methods .= "MetaSVM,";
        $D_no++;
     }else{
        $svm = 'T';
@@ -79,6 +81,7 @@ while(my $line=<IN>){
    }
    elsif($lr_score >= $cutoff{'MetaLR'}){
        $lr = 'D';
+       $d_methods .= "MetaLR,";
        $D_no++;
    }else{
        $lr = 'T';
@@ -90,6 +93,7 @@ while(my $line=<IN>){
    }
    elsif($vest_score >= $cutoff{'VEST'}){
        $vest = 'D';
+       $d_methods .= "VEST,";
        $D_no++;
    }else{
        $vest = 'T';
@@ -102,6 +106,7 @@ while(my $line=<IN>){
    }
    elsif($cadd_score >= $cutoff{'CADD'}){
        $cadd = 'D';
+       $d_methods .= "CADD,";
        $D_no++;
    }else{
        $cadd = 'T';
@@ -113,6 +118,7 @@ while(my $line=<IN>){
    }
    elsif($revel_score >= $cutoff{'REVEL'}){
        $revel = 'D';
+       $d_methods .= "REVEL,";
        $D_no++;
    }else{
        $revel = 'T';
@@ -122,9 +128,11 @@ while(my $line=<IN>){
    my $add = 'NA';
    my $vote = 'NA';
    my $two_step = 'NA';
-   
+   my $d_index;   
    if(($D_no > 0)and($T_no == 0)){#ADD
+	$d_methods =~ s/,$//;
        $two_step_index = "ADD,".$D_no;
+       $d_index = "ADD:".$d_methods;
        $add = 'D';
        $two_step = 'D';
    }elsif(($T_no > 0)and($D_no == 0)){#ADD
@@ -137,6 +145,8 @@ while(my $line=<IN>){
       
        if($D_no > $T_no){
            $two_step_index = "VOTE,".$D_no;
+	   $d_methods =~ s/,$//;
+	   $d_index = "VOTE:".$d_methods;
 	   $vote = 'D';
 	   $two_step = 'D';
        }elsif($T_no > $D_no){
@@ -166,7 +176,7 @@ while(my $line=<IN>){
        }elsif($output_type eq "hg19"){
            print DAMAGE $pos_hg19."\t".$gene."\n";
        }else{
-           print DAMAGE $pos."\t".$pos_hg19."\t".$gene."\n";
+           print DAMAGE $pos."\t".$pos_hg19."\t".$gene."\texonic\tmissense\tDeleterious:".$d_index."\n";
        }
    }
 }
