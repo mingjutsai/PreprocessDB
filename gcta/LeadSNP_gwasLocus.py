@@ -7,6 +7,7 @@ def parse_arguments():
     ### define arguments
     str_description = ''
     str_description += 'Split GWAS summary to locus. '
+    str_description += 'generate gcta format from leadSNP locus '
     parser = argparse.ArgumentParser(prog='LeadSNP_gwasLocus', description=str_description)
 
     ### define arguments for I/O
