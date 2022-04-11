@@ -27,7 +27,8 @@ def main(args=None):
         #    continue
         chr = ele[3]
         str_cmd = gcta + " "
-        str_cmd += "--bfile /mnt/Storage4/fy60/proj_mingju_01/ukbb_bgen_bed_ramdom50k/out_set-var-id/chr" + chr + " "
+        #str_cmd += "--bfile /mnt/Storage4/fy60/proj_mingju_01/ukbb_bgen_bed_ramdom50k/out_set-var-id/chr" + chr + " "
+        str_cmd += "--bfile /mnt/Storage4/fy60/proj_mingju_01/ukbb_bgen_bed_ramdom50k/out_set-var-id_common-maf-0.01/chr" + chr + " "
         str_cmd += "--cojo-file " + rsid + "_locus.txt "
         str_cmd += "--cojo-cond " + rsid + "_cojo.cond "
         str_cmd += "--out " + rsid +"_locus --maf 0.01 "

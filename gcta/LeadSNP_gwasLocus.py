@@ -11,7 +11,7 @@ def parse_arguments():
     parser = argparse.ArgumentParser(prog='LeadSNP_gwasLocus', description=str_description)
 
     ### define arguments for I/O
-    parser.add_argument("-l", required=True, help="the file of leadSNP (from FUMA: GenomicRiskLoci.txt)")
+    parser.add_argument("-l", required=True, help="the file of leadSNP (from FUMA: GenomicRiskLoci.txt.annovar.fa)")
     parser.add_argument("-i", required=True, help="the file of gwas_summary with .gcta format")
     
     return parser
