@@ -30,6 +30,7 @@ def main(args=None):
         rsid = ele[2]
         if rsid == 'RSID' or rsid == 'NA':
             continue
+        print(rsid)
         workdir = gwas_locus_path + "/" + rsid
         leadSNP = ele[1]
         leadSNP_ID = leadSNP.replace(':','_')
@@ -41,32 +42,35 @@ def main(args=None):
         rsid_locus = gwas_locus_path + "/" + rsid + "_locus.txt"
         if not os.path.isfile(finemap_z):
             cmd = "perl /home/mingju/PreprocessDB/finemap/finemapping_input.pl " + rsid_locus + " " + finemap_z
+            print(cmd)
             os.system(cmd)
         finemap_ld = workdir + "/" + rsid + ".ld"
         if not os.path.isfile(finemap_ld):
-            ld_matrix = ld_path + "/" + leadSNP_ID + "_locus.txt.cut1.ld"
+            #ld_matrix = ld_path + "/" + leadSNP_ID + "_locus.txt.cut1.ld"
+            ld_matrix = ld_path + "/" + rsid + "_locus.txt.ld"
+            print(ld_matrix)
             if os.path.isfile(ld_matrix):
                 cmd = "cp " + ld_matrix + " " + workdir + "/"
                 os.system(cmd)
-                cmd = "perl /home/mingju/PreprocessDB/finemap/ld2finemapping.pl " + workdir + "/" + leadSNP_ID + "_locus.txt.cut1.ld " + finemap_ld
-                #print(cmd)
+                #cmd = "perl /home/mingju/PreprocessDB/finemap/ld2finemapping.pl " + workdir + "/" + leadSNP_ID + "_locus.txt.cut1.ld " + finemap_ld
+                cmd = "perl /home/mingju/PreprocessDB/finemap/ld2finemapping.pl " + workdir + "/" + rsid + "_locus.txt.ld " + finemap_ld
+                print(cmd)
                 #quit()
                 os.system(cmd)
-
         master = workdir + "/master"
         if not os.path.isfile(master):
             masterfile = open(master,'w')
-            masterfile.write("z;ld;snp;config;log;k;n_samples\n")
+            masterfile.write("z;ld;snp;config;log;n_samples\n")
             finemap_snp = workdir + "/" + rsid + ".snp"
             finemap_config = workdir + "/" + rsid + ".config"
             finemap_log = workdir + "/" + rsid + ".log"
-            finemap_k = workdir + "/" + rsid + ".k"
+            #finemap_k = workdir + "/" + rsid + ".k"
             if not os.path.isfile(finemap_z):
                 print("finemap.z doesn't exist:" + finemap_z)
             if not os.path.isfile(finemap_ld):
                 print("finemap.ld doesn't exist:" + finemap_ld)
             if os.path.isfile(finemap_z) and os.path.isfile(finemap_ld):
-                masterfile.write(finemap_z + ";" + finemap_ld + ";" + finemap_snp + ";" + finemap_config + ";" + finemap_log + ";" + finemap_k + ";" + gwas_size)
+                masterfile.write(finemap_z + ";" + finemap_ld + ";" + finemap_snp + ";" + finemap_config + ";" + finemap_log + ";" + gwas_size)
         finemap = "/mnt/Storage2/mingju/ifar/tools/finemap_v1.2_x86_64/finemap_v1.2_x86_64"
         finemap_result = workdir + "/" + rsid + ".snp"
         if not os.path.isfile(finemap_result):

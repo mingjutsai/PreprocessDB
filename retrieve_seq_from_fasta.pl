@@ -221,7 +221,9 @@ for my $i (0 .. @$sorted_region-1) {
 	}
 	
 	if ($tabout) {
+		#print STDERR "name:".$name."\texonpos:".$exonpos."\n";
 		my $ref = $name_seq{$name, $exonpos};
+		#print STDERR "ref:".$ref."\n";
 		my @ele = split(/[:,-]/,$name);
 		my $chr = $ele[0];
 		my $start = $ele[1];
@@ -275,7 +277,11 @@ for my $i (0 .. @$sorted_region-1) {
 			$alt = $allele1{$allele_pos};
 		    }
 		}
-		print $chr."\t".$start."\t".$end."\t".$ref."\t".$alt."\t".$info{$allele_pos}."\n";
+		if(!$info{$allele_pos}){
+			print $chr."\t".$start."\t".$end."\t".$ref."\t".$alt."\n";
+		}else{
+			print $chr."\t".$start."\t".$end."\t".$ref."\t".$alt."\t".$info{$allele_pos}."\n";
+		}
 		#print $name, "\t", $name, "\t", $exonpos, "\t", $name_seq{$name, $exonpos}, "\n";
 	} else {
 		print ">$name ", $discordlen{$name}?"Warning: $name occur more than once in file with discordant length. ":" ", $badorf{$name, $exonpos}?"Warning: this coding transcript does not have correct ORF annotation. ":" ", 
