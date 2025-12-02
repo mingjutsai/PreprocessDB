@@ -30,17 +30,11 @@ while(my $line=<IN>){
         if($i =~ /CLNSIG=/){
             my @sigtmp = split(/=/,$i);
             $sig = $sigtmp[1];
+	    if($sig){
+		print OUT $chr."\t".$pos."\t".$pos_end."\t".$ref."\t".$alt."\t".$sig."\n";
+	    }
         }
     }
-    if(!$sig){
-        foreach my $i (@tmp){
-            if($i =~ /CLNSIGINCL=/){
-               my @sigtmp = split(/:/,$i);
-               $sig = $sigtmp[1];
-            }
-        }
-    }
-    print OUT $chr."\t".$pos."\t".$pos_end."\t".$ref."\t".$alt."\t".$sig."\n";
 }
 close IN;
 close OUT;
