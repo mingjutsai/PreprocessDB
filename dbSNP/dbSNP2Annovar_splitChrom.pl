@@ -14,9 +14,10 @@ while(my $line=<AS>){
         next;
     }
     my @ele = split(/\t/,$line);
-    my $chr = $ele[9];
+    my $chr = $ele[11];#chr
     $chr =~ s/\r$//;
-    $mapping{$ele[6]} = $chr;
+    $mapping{$ele[8]} = $chr;#ele[7] = NC
+    print $ele[8].":".$chr."\n";
 }
 close AS;
 #my $output = $input."_annovar";
