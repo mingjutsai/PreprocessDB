@@ -4,9 +4,10 @@ use warnings;
 my $input = $ARGV[0];
 my $assembly_report = $ARGV[1];
 if(@ARGV < 2){
-    print STDERR "perl 1000g2Annovar.pl vcf.gz assembly_report.txt\n";die;
+    print STDERR "perl dbSNP2Annovar_splitChrom.pl vcf.gz assembly_report.txt\n";die;
 }
-my %mapping;
+my %refseq_mapping;
+my %ucsc_mapping;
 open AS,"<",$assembly_report;
 while(my $line=<AS>){
     chomp $line;
@@ -14,15 +15,23 @@ while(my $line=<AS>){
         next;
     }
     my @ele = split(/\t/,$line);
-    my $chr = $ele[11];#chr
+    my $chr = $ele[2];#Assigned-Molecule
     $chr =~ s/\r$//;
-    $mapping{$ele[8]} = $chr;#ele[7] = NC
-    print $ele[8].":".$chr."\n";
+    my $refseq_name = $ele[6];
+    my $ucsc_name = $ele[9];
+    $ucsc_name =~ s/^chr//;
+    $ucsc_mapping{$ucsc_name} = $chr;
+    $refseq_mapping{$refseq_name} = $chr;
+    print "ucsc:".$ucsc_name."\n";
+    print "refseq:".$refseq_name."\n";
+    print "chr:".$chr."\n";
 }
 close AS;
 #my $output = $input."_annovar";
 #open OUT,">",$output;
 #print OUT "#Chr\tStart\tEnd\tRef\tAlt\tRSID\tAF\n";
+my $unable_map = $input."_unmapping.tsv";
+open UN,">",$unable_map;
 my $old_chr = "NA";
 open(IN, "gunzip -c $input |") || die "can't open pipe to ".$input."\n";
 while(my $line=<IN>){
@@ -32,9 +41,15 @@ while(my $line=<IN>){
     }
     my @ele = split(/\t/,$line);
     my $chr = $ele[0];
-    if($mapping{$chr}){
-        $chr = $mapping{$chr};
+    if($refseq_mapping{$chr}){
+        $chr = $refseq_mapping{$chr};
 	$chr =~ s/chr//;
+    }elsif($ucsc_mapping{$chr}){
+    	$chr = $ucsc_mapping{$chr};
+	$chr =~ s/chr//;
+    }else{
+    	print UN $chr."\n";
+	next;
     }
     my $output = $input."_Chr".$chr."_annovar";
     my $fo;
@@ -83,3 +98,4 @@ while(my $line=<IN>){
     close $fo; 
 }
 close IN;
+close UN;
