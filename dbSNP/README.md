@@ -37,11 +37,10 @@ The `dbSNP2Annovar_splitChrom.pl` script processes dbSNP VCF.gz files into ANNOV
 
 ### Download Sequence Report
 
-Download the genome sequence report from NCBI Datasets:
-
-1. Go to https://www.ncbi.nlm.nih.gov/datasets/genome/GCF_000001405.40/
-2. Select the RefSeq download option.
-3. Download the sequence report file (e.g., `GCF_000001405.40_sequence_report.tsv`).
+Download the genome assembly report from NCBI Datasets:
+```bash
+wget https://ftp.ncbi.nlm.nih.gov/genomes/all/GCF/000/001/405/GCF_000001405.40_GRCh38.p14/GCF_000001405.40_GRCh38.p14_assembly_report.txt
+```
 
 ### Usage
 
