@@ -35,9 +35,8 @@ The `dbSNP2Annovar_splitChrom.pl` script processes dbSNP VCF.gz files into ANNOV
 - Perl
 - gunzip (for handling compressed VCF files)
 
-### Download Sequence Report
+### Download Assembly Report
 
-Download the genome assembly report from NCBI Datasets:
 ```bash
 wget https://ftp.ncbi.nlm.nih.gov/genomes/all/GCF/000/001/405/GCF_000001405.40_GRCh38.p14/GCF_000001405.40_GRCh38.p14_assembly_report.txt
 ```
