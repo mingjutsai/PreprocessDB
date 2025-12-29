@@ -55,7 +55,7 @@ while(my $line=<IN>){
     my $fo;
     if($chr ne $old_chr){
         open $fo,">",$output;
-	print $fo "#Chr\tStart\tEnd\tRef\tAlt\tRSID\tAF\n";
+	print $fo "#Chr\tStart\tEnd\tRef\tAlt\tRSID\tAF\tvariantID\n";
     }else{
         open $fo,">>",$output;
     }
@@ -89,7 +89,8 @@ while(my $line=<IN>){
 	        $final_maf = "NA";
 	    }
 	    my $alt_no = $no - 1;
-	    my $annovar_info = join("\t",$chr,$pos,$end,$ref,$alt[$alt_no],$rsid,$final_maf);
+	    my $variant_id = $chr."-".$pos."-".$ref."-".$alt[$alt_no];
+	    my $annovar_info = join("\t",$chr,$pos,$end,$ref,$alt[$alt_no],$rsid,$final_maf,$variant_id);
 	    print $fo $annovar_info."\n";
 	}
 	#die;
