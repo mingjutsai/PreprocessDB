@@ -44,18 +44,23 @@ while(my $line=<IN>){
     if($refseq_mapping{$chr}){
         $chr = $refseq_mapping{$chr};
 	$chr =~ s/chr//;
-    }elsif($ucsc_mapping{$chr}){
-    	$chr = $ucsc_mapping{$chr};
-	$chr =~ s/chr//;
     }else{
-    	print UN $chr."\n";
-	next;
+    #elsif($ucsc_mapping{$chr}){
+    #	$chr = $ucsc_mapping{$chr};
+    #	$chr =~ s/chr//;
+    #}else{
+    #	print UN $chr."\n";
+    	next;
     }
     my $output = $input."_Chr".$chr."_annovar";
     my $fo;
     if($chr ne $old_chr){
-        open $fo,">",$output;
-	print $fo "#Chr\tStart\tEnd\tRef\tAlt\tRSID\tAF\tvariantID\n";
+	if(!-e $output){
+            open $fo,">",$output;
+	    print $fo "#Chr\tStart\tEnd\tRef\tAlt\tRSID\tAF\tvariantID\n";
+    	}else{
+	    open $fo,">>",$output;
+	}
     }else{
         open $fo,">>",$output;
     }
