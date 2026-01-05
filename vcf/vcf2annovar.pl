@@ -16,7 +16,7 @@ if($vcf =~ /\.gz$/){
 
 while(my $line=<VCF>){
     chomp $line;
-    if($line =~ /^#CHROM/ or $line =~ /CHR/){
+    if($line =~ /^#CHROM/ or $line =~ /CHR/ or $line =~ /^#Chr/){
 	print OUT "#Chr\tStart\tEnd\tRef\tAlt\t".$line."\n";
         next;
     }elsif($line =~ /^##/){
