@@ -17,7 +17,7 @@ if(@ARGV < 2){
 $input_dir = dirname($gtf);
 $gtf_gene = $gtf."_GenePred";
 $predGene_process = $gtf_gene."_process";
-$gtf2GenePred = $src_dir."/gtfToGenePred";
+$gtf2GenePred = "/home/mingju/miniforge3/bin/gtfToGenePred";
 $hg2GRCh = $src_dir."/hg19_GRCh37";
 $process = $src_dir."/process_genePred.pl";
 $gene2fa = $src_dir."/gene2fa.pl";
