@@ -7,22 +7,37 @@ The goal of the scripts in this folder is to generate ANNOVAR format files for h
 
 ### Workflow:
 1. Download the latest GENCODE GTF file for hg38 (e.g., gencode.vXX.annotation.gtf.gz from https://www.gencodegenes.org/human/).
-2. Use `ensembl2UCSC.pl` to convert the GENCODE GTF to ANNOVAR format `hg38_ensGene.txt` and generate the mRNA FASTA file `hg38_ensGeneMrna.fa`.
+2. Use `ensembl2UCSC_annovar.pl` to convert the GENCODE GTF to ANNOVAR format `hg38_ensGene.txt` and generate the mRNA FASTA file `hg38_ensGeneMrna.fa`.
 
 ## Scripts Overview
 
-### 1. `gencode2gene.pl`
-Extracts gene information from GENCODE GTF files.
+### 1. `ensembl2UCSC_annovar.pl`
+Converts Ensembl GTF files to ANNOVAR format gene annotation files and generates corresponding mRNA FASTA files.
 
 **Usage:**
 ```bash
-perl gencode2gene.pl input.gtf
+perl ensembl2UCSC_annovar.pl --gtf <file.gtf> --build <19|38> --seqdir <reference_fasta_dir> [--outdir <output_dir>]
 ```
 
-**Output:** Creates `input.gtf_gene.txt` with columns: Chr, Start, End, Strand, Gene_Name, Gene_ID, Gene_Type
+**Required arguments:**
+- `--gtf, -g`: Input GTF file (e.g. Homo_sapiens.GRCh38.113.gtf)
+- `--build, -b`: Genome build: 19 or 38
+- `--seqdir, -s`: Directory containing reference FASTA files for the build
 
-### 2. `gene2fa.pl`
-Converts gene coordinate files to FASTA format by retrieving sequences.
+**Optional:**
+- `--outdir, -o`: Output directory (default: same directory as the GTF)
+- `--help, -h`: Show this help message
+
+### 2. `process_genePred.pl`
+Processes genePred format files, used for cleanup and normalization in the ensembl2UCSC_annovar.pl pipeline.
+
+**Usage:**
+```bash
+perl process_genePred.pl convert_file input_file
+```
+
+### 3. `gene2fa.pl`
+Converts gene coordinate files to FASTA format by retrieving sequences, used in the ensembl2UCSC_annovar.pl pipeline to generate mRNA FASTA.
 
 **Usage:**
 ```bash
@@ -31,8 +46,8 @@ perl gene2fa.pl gene_file sequence_path db build
 
 **Dependencies:** Requires `retrieve_seq_from_fasta.pl` in the same directory.
 
-### 3. `retrieve_seq_from_fasta.pl`
-Retrieves DNA sequences from FASTA files based on genomic coordinates.
+### 4. `retrieve_seq_from_fasta.pl`
+Retrieves DNA sequences from FASTA files based on genomic coordinates, used by gene2fa.pl.
 
 **Usage:**
 ```bash
@@ -48,23 +63,15 @@ perl retrieve_seq_from_fasta.pl [options] --regionfile regions.txt --seqdir /pat
 - `--altchr`: Use alternative chromosome naming
 - `--addchr`: Add 'chr' prefix to chromosome names
 
-### 4. `process_genePred.pl`
-Processes genePred format files, likely for conversion or filtering.
+### 5. `gencode2gene.pl`
+Extracts gene information from GENCODE GTF files.
 
 **Usage:**
 ```bash
-perl process_genePred.pl convert_file input_file
+perl gencode2gene.pl input.gtf
 ```
 
-### 5. `ensembl2UCSC.pl`
-Converts GENCODE GTF files to ANNOVAR format gene annotation files and generates corresponding mRNA FASTA files.
-
-**Usage:**
-```bash
-perl ensembl2UCSC.pl [GTF_File] [build_number]
-```
-Where build_number is 19 for hg19 or 38 for hg38.
-```
+**Output:** Creates `input.gtf_gene.txt` with columns: Chr, Start, End, Strand, Gene_Name, Gene_ID, Gene_Type
 
 ## Data Files
 
