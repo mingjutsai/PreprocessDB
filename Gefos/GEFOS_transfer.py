@@ -92,7 +92,7 @@ def main():
                 #content = fields[6] + ':' + fields[7] + ':' + fields[8] + ':' + fields[9] \
                 #        + ':' + fields[10] + ':' + fields[11] + ':' + fields[12] + ':' + fields[13] \
                 #        + ':' + fields[14] + ':' + fields[15] + ':' + fields[16]
-            vcf_info = [chr,pos,rsid,ref,alt,filter,info,format,content]
+            vcf_info = [chr,pos,snpid,ref,alt,filter,info,format,content]
             vcf_content = '\t'
             vcf_content = vcf_content.join(vcf_info)
             wfile.write(vcf_content + '\n')
