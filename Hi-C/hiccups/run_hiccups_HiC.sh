@@ -32,24 +32,27 @@ HIC=$(realpath $HIC)
 mkdir -p $OUTDIR
 
 # Resolution-specific HICCUPS parameters
-# -p peak window (pixels), -i inner distance (pixels)
+# -p peak width (bins), -i window size (bins), -d centroid distance (bp)
+# juicer_tools has no default centroid distance for 2kb — must specify -d explicitly
+# --cpu: CPU-only mode (no GPU required); restricts search to within 8MB of diagonal
 case $RES in
-    2000)  P=2; I=5  ;;
-    5000)  P=4; I=7  ;;
-    10000) P=2; I=5  ;;
-    25000) P=1; I=3  ;;
-    *)     P=2; I=5  ;;
+    2000)  P=2; I=7; D=20000 ;;
+    5000)  P=4; I=7; D=20000 ;;
+    10000) P=2; I=5; D=20000 ;;
+    25000) P=1; I=3; D=25000 ;;
+    *)     P=2; I=7; D=20000 ;;
 esac
 
-echo "[$(date)] Step 1/2 — Running HICCUPS at ${RES}bp..."
+echo "[$(date)] Step 1/2 — Running HICCUPS (CPU) at ${RES}bp (p=$P i=$I d=$D)..."
 java -Xmx80g -jar $JUICER hiccups \
+    --cpu --threads 18 \
     -k KR \
     -r $RES \
     -f 0.1 \
     -p $P \
     -i $I \
+    -d $D \
     -t 0.02,1.5,1.75,2 \
-    --threads 18 \
     $HIC \
     $OUTDIR
 

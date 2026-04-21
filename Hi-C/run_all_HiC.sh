@@ -114,14 +114,15 @@ GOTHIC_PID=$!
 # HICCUPS
 (
     case $RES in
-        2000) P=2; I=7  ;;
-        5000) P=4; I=7  ;;
-        *)    P=2; I=5  ;;
+        2000) P=2; I=7; D=20000 ;;
+        5000) P=4; I=7; D=20000 ;;
+        *)    P=2; I=7; D=20000 ;;
     esac
-    echo "[HICCUPS $(date)] Running at ${RES}bp (p=$P i=$I)..."
+    echo "[HICCUPS $(date)] Running at ${RES}bp (p=$P i=$I d=$D)..."
     java -Xmx80g -jar $JUICER hiccups \
-        -k KR -r $RES -f 0.1 -p $P -i $I \
-        -t 0.02,1.5,1.75,2 --threads $THREADS \
+        --cpu --threads $THREADS \
+        -k KR -r $RES -f 0.1 -p $P -i $I -d $D \
+        -t 0.02,1.5,1.75,2 \
         $HIC $WORKDIR/loops/
     POSTPROCESSED=$WORKDIR/loops/postprocessed_pixels_${RES}.bedpe
     if [ -f "$POSTPROCESSED" ]; then

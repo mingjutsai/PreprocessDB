@@ -49,6 +49,25 @@ Hi-C/
 | `<sample>.hic` | Generated from `.pre` with `juicer_tools pre -r <res> -k KR` |
 | `Digest_hg38_*.txt` | MboI restriction digest file for GOTHiC |
 
+#### What is a `.pre` file?
+
+A `.pre` file is the intermediate text format produced by the juicer alignment pipeline. It stores every aligned read pair at base-pair resolution — one pair per line, 11 tab-separated columns:
+
+```
+readname  str1 chr1 pos1 frag1  str2 chr2 pos2 frag2  mapq1 mapq2
+```
+
+| Column | Description |
+|--------|-------------|
+| readname | Read pair ID |
+| str1 / str2 | Strand of each read (0 = forward, 16 = reverse) |
+| chr1 / chr2 | Chromosome of each read |
+| pos1 / pos2 | Genomic position of each read (bp) |
+| frag1 / frag2 | Restriction fragment index |
+| mapq1 / mapq2 | Mapping quality of each read |
+
+Because it stores every read pair as plain text, `.pre` files are large (100+ GB for deep datasets). The `.hic` file is the compressed, binned, indexed form of the same data — smaller and faster to query, but requires the `.pre` to regenerate at a different resolution.
+
 > **Note:** The `.hic` file must have KR normalization at the target resolution.  
 > Generate with: `java -Xmx80g -jar juicer_tools.jar pre -r 2000 -q 30 -k KR -v --threads 18 input.pre output.hic hg38`
 
