@@ -38,9 +38,13 @@ GENOME=hg38
 mkdir -p $OUTDIR
 cd $OUTDIR
 
-echo "[$(date)] Step 1/6 — Converting .pre to HOMER pairs format..."
-perl $PREPROCESS/pre2homer.pl $PRE ${SAMPLE}.homer
-echo "[$(date)] Pairs written: $(wc -l < ${SAMPLE}.homer)"
+if [ -f "${SAMPLE}.homer" ]; then
+    echo "[$(date)] Step 1/6 — Skipping: ${SAMPLE}.homer already exists"
+else
+    echo "[$(date)] Step 1/6 — Converting .pre to HOMER pairs format..."
+    perl $PREPROCESS/pre2homer.pl $PRE ${SAMPLE}.homer
+    echo "[$(date)] Pairs written: $(wc -l < ${SAMPLE}.homer)"
+fi
 
 echo "[$(date)] Step 2/6 — makeTagDirectory..."
 makeTagDirectory ${SAMPLE}_tagdir \
