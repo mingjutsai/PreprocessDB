@@ -15,7 +15,8 @@
 #   bash run_homer_HiC.sh mergedOC mergedOC.bam.pre homer_2k 2000
 #
 # Requirements:
-#   - HOMER in PATH (export PATH=/mnt/Storage3/ifar/tools/homer/bin:$PATH)
+#   - HOMER installed via pixi: pixi global install -c bioconda homer
+#   - Number::FormatEng perl module: cpanm Number::FormatEng
 #   - PreprocessDB/Hi-C scripts in ~/PreprocessDB/Hi-C/
 
 SAMPLE=$1
@@ -29,8 +30,9 @@ if [ $# -lt 4 ]; then
     exit 1
 fi
 
-HOMER_BIN=/mnt/Storage3/ifar/tools/homer/bin
-PREPROCESS=~/PreprocessDB/Hi-C/Homer
+# Resolve pre file to absolute path before any cd
+PRE=$(realpath $PRE)
+PREPROCESS=$(realpath ~/PreprocessDB/Hi-C/Homer)
 GENOME=hg38
 
 mkdir -p $OUTDIR
@@ -41,12 +43,12 @@ perl $PREPROCESS/pre2homer.pl $PRE ${SAMPLE}.homer
 echo "[$(date)] Pairs written: $(wc -l < ${SAMPLE}.homer)"
 
 echo "[$(date)] Step 2/6 — makeTagDirectory..."
-$HOMER_BIN/makeTagDirectory ${SAMPLE}_tagdir \
+makeTagDirectory ${SAMPLE}_tagdir \
     -format HiCsummary \
     ${SAMPLE}.homer
 
 echo "[$(date)] Step 3/6 — analyzeHiC (res=${RES}bp, genome=${GENOME})..."
-$HOMER_BIN/analyzeHiC ${SAMPLE}_tagdir \
+analyzeHiC ${SAMPLE}_tagdir \
     -res $RES \
     -genome $GENOME \
     -interactions ${SAMPLE}_sigInteractions.txt \
