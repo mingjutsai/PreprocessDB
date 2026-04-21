@@ -37,10 +37,15 @@ THREADS=18
 mkdir -p $OUTDIR
 cd $OUTDIR
 
-# ── Step 1: Convert pre → per-chr gothic files ────────────────────────────
-echo "[$(date)] Step 1/5 — Converting .pre to per-chr gothic files..."
-perl $PREPROCESS/pre2gothic.pl $PRE $SAMPLE . 2>&1
-echo "[$(date)] gothic files written: $(ls ${SAMPLE}_chr*.gothic 2>/dev/null | wc -l) chromosomes"
+# ── Step 1: Convert pre → per-chr gothic files (skip if already done) ────
+GOTHIC_COUNT=$(ls ${SAMPLE}_chr*.gothic 2>/dev/null | wc -l)
+if [ "$GOTHIC_COUNT" -ge 24 ]; then
+    echo "[$(date)] Step 1/5 — Skipping: per-chr gothic files already exist (${GOTHIC_COUNT} found)"
+else
+    echo "[$(date)] Step 1/5 — Converting .pre to per-chr gothic files..."
+    perl $PREPROCESS/pre2gothic.pl $PRE $SAMPLE . 2>&1
+    echo "[$(date)] gothic files written: $(ls ${SAMPLE}_chr*.gothic 2>/dev/null | wc -l) chromosomes"
+fi
 
 # ── Step 2: Generate per-chr R scripts ───────────────────────────────────
 echo "[$(date)] Step 2/5 — Generating R scripts..."
