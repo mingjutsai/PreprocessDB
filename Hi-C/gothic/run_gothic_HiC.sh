@@ -48,6 +48,7 @@ for i in $(seq 1 22) X Y; do
     GOTHIC_FILE="${SAMPLE}_chr${i}.gothic"
     RESULT_FILE="${SAMPLE}_chr${i}_gothic.results"
     cat > gothic_chr${i}.r << RSCRIPT
+.libPaths(c("~/R/library", .libPaths()))
 library(GOTHiC)
 binom <- GOTHiChicup("${GOTHIC_FILE}",
     sampleName    = "${SAMPLE}_chr${i}",
