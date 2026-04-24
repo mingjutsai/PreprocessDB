@@ -16,7 +16,6 @@ Hi-C/
 ├── EP_database.pl              # Generates enhancer-promoter interaction database
 ├── Homer/
 │   ├── run_analyzeHiC_parallel.sh  # makeTagDirectory + per-chr analyzeHiC (parallel)
-│   ├── splitChrom.sh               # Split interactions by chromosome
 │   ├── run_allChr.pl               # Filter per chromosome (18 parallel jobs)
 │   ├── homer2bed_simple.pl         # Filter FDR<=0.05, reads>=10
 │   └── merge.pl                    # Merge all chromosomes
@@ -122,7 +121,7 @@ pre2homer_gothic.pl          ← reads .pre ONCE, outputs both formats
    HOMER                  GOTHiC                HICCUPS
 makeTagDirectory      GOTHiChicup R          juicer_tools hiccups
 analyzeHiC            (per chr, parallel)    (KR normalized .hic)
-splitChrom            gothic2bed.pl          hiccups2bed.pl
+                      gothic2bed.pl          hiccups2bed.pl
 run_allChr.pl         merge.pl
 merge.pl
       │                      │                      │
