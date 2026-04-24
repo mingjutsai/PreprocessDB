@@ -1,41 +1,54 @@
 #!/bin/bash
-# run_analyzeHiC_parallel.sh — Run analyzeHiC per chromosome in parallel
+# run_analyzeHiC_parallel.sh — makeTagDirectory + per-chromosome analyzeHiC in parallel
 #
-# Replaces the single genome-wide analyzeHiC call in run_homer_HiC.sh with
-# per-chromosome jobs run in parallel. Outputs directly to split_results/
-# chrN.sigInteractions.txt, bypassing splitChrom.sh. After all chromosomes
-# finish, runs run_allChr.pl and merge.pl.
+# Steps:
+#   1. makeTagDirectory (skipped if tag directory already exists)
+#   2. analyzeHiC per chromosome in parallel (-chr), writing directly to split_results/
+#   3. FDR filter per chromosome (run_allChr.pl)
+#   4. Merge all chromosomes (merge.pl)
 #
 # Usage:
-#   bash run_analyzeHiC_parallel.sh <sample_name> <outdir> <resolution> [max_jobs]
+#   bash run_analyzeHiC_parallel.sh <sample_name> <homer_file> <outdir> <resolution> [max_jobs]
 #   Example:
-#   bash run_analyzeHiC_parallel.sh mergedOC homer_2k 2000 8
+#   bash run_analyzeHiC_parallel.sh mergedOC mergedOC.homer homer_2k 2000 8
 #
 # Requirements:
-#   - HOMER installed (analyzeHiC in PATH)
-#   - <outdir>/<sample_name>_tagdir must already exist (from makeTagDirectory)
+#   - HOMER installed (makeTagDirectory, analyzeHiC in PATH)
 #   - PreprocessDB/Hi-C/Homer scripts in ~/PreprocessDB/Hi-C/Homer/
 
 SAMPLE=$1
-OUTDIR=$2
-RES=$3
-MAX_JOBS=${4:-8}
+HOMER=$2
+OUTDIR=$3
+RES=$4
+MAX_JOBS=${5:-8}
 
-if [ $# -lt 3 ]; then
-    echo "Usage: bash run_analyzeHiC_parallel.sh <sample_name> <outdir> <resolution> [max_jobs]"
-    echo "Example: bash run_analyzeHiC_parallel.sh mergedOC homer_2k 2000 8"
+if [ $# -lt 4 ]; then
+    echo "Usage: bash run_analyzeHiC_parallel.sh <sample_name> <homer_file> <outdir> <resolution> [max_jobs]"
+    echo "Example: bash run_analyzeHiC_parallel.sh mergedOC mergedOC.homer homer_2k 2000 8"
     exit 1
 fi
 
+HOMER=$(realpath $HOMER)
 OUTDIR=$(realpath $OUTDIR)
 TAGDIR=$OUTDIR/${SAMPLE}_tagdir
 SPLITDIR=$OUTDIR/split_results
 PREPROCESS=$(realpath ~/PreprocessDB/Hi-C/Homer)
 LOG=$OUTDIR/analyzeHiC_parallel.log
 
-CHRS="chrY chrX chr22 chr21 chr19 chr20 chr16 chr17 chr15 chr18 chr13 chr14 chr9 chr11 chr10 chr12 chr8 chr7 chr6 chr4 chr5 chr3 chr1 chr2"
+mkdir -p $OUTDIR $SPLITDIR
 
-mkdir -p $SPLITDIR
+# Step 1: makeTagDirectory
+if [ -f "$TAGDIR/tagInfo.txt" ]; then
+    echo "[$(date)] Step 1/3 — Skipping makeTagDirectory: $TAGDIR already exists" | tee -a $LOG
+else
+    echo "[$(date)] Step 1/3 — makeTagDirectory..." | tee -a $LOG
+    makeTagDirectory $TAGDIR \
+        -format HiCsummary \
+        $HOMER 2>&1 | tee -a $LOG
+fi
+
+# Step 2: per-chromosome analyzeHiC
+CHRS="chrY chrX chr22 chr21 chr19 chr20 chr16 chr17 chr15 chr18 chr13 chr14 chr9 chr11 chr10 chr12 chr8 chr7 chr6 chr4 chr5 chr3 chr1 chr2"
 
 run_chr() {
     local CHR=$1
@@ -65,14 +78,13 @@ run_chr() {
 export -f run_chr
 export TAGDIR SPLITDIR RES LOG
 
-echo "[$(date)] Starting per-chromosome analyzeHiC (max $MAX_JOBS jobs, res=${RES}bp)" > $LOG
-echo "Tag directory: $TAGDIR" >> $LOG
+echo "[$(date)] Step 2/3 — analyzeHiC per chromosome (max $MAX_JOBS jobs, res=${RES}bp)" >> $LOG
 
 echo $CHRS | tr ' ' '\n' | \
     xargs -P $MAX_JOBS -I{} bash -c 'run_chr "$@"' _ {}
 
-echo "[$(date)] All analyzeHiC jobs done. Running FDR filter + merge..." >> $LOG
-
+# Step 3: FDR filter + merge
+echo "[$(date)] Step 3/3 — FDR filter + merge..." >> $LOG
 cd $SPLITDIR
 perl $PREPROCESS/run_allChr.pl >> $LOG 2>&1
 perl $PREPROCESS/merge.pl >> $LOG 2>&1
