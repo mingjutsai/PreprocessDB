@@ -51,10 +51,9 @@ makeTagDirectory ${SAMPLE}_tagdir \
     -format HiCsummary \
     ${SAMPLE}.homer
 
-echo "[$(date)] Step 3/6 — analyzeHiC (res=${RES}bp, genome=${GENOME})..."
+echo "[$(date)] Step 3/6 — analyzeHiC (res=${RES}bp)..."
 analyzeHiC ${SAMPLE}_tagdir \
     -res $RES \
-    -genome $GENOME \
     -interactions ${SAMPLE}_sigInteractions.txt \
     -nomatrix
 
