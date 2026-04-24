@@ -66,18 +66,12 @@ echo "[$(date)] Step 2 — Launching HOMER, GOTHiC, HICCUPS in parallel..."
 
 # HOMER
 (
-    cd $WORKDIR/homer_${RES}
-    echo "[HOMER $(date)] makeTagDirectory..."
-    makeTagDirectory ${SAMPLE}_tagdir -format HiCsummary ${SAMPLE}.homer
-    echo "[HOMER $(date)] analyzeHiC..."
-    analyzeHiC ${SAMPLE}_tagdir \
-        -res $RES -genome hg38 \
-        -interactions ${SAMPLE}_sigInteractions.txt -nomatrix
-    echo "[HOMER $(date)] splitChrom + filter + merge..."
-    bash $PREPROCESS/Homer/splitChrom.sh ${SAMPLE}_sigInteractions.txt
-    cd split_results
-    perl $PREPROCESS/Homer/run_allChr.pl
-    perl $PREPROCESS/Homer/merge.pl
+    bash $PREPROCESS/Homer/run_analyzeHiC_parallel.sh \
+        $SAMPLE \
+        $HOMER_FILE \
+        $WORKDIR/homer_${RES} \
+        $RES \
+        $THREADS
     echo "[HOMER $(date)] Done → allchr.sigInteractions.HOMER"
 ) > $WORKDIR/homer_${RES}/homer.log 2>&1 &
 HOMER_PID=$!

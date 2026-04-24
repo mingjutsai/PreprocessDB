@@ -15,11 +15,11 @@ Hi-C/
 ├── merge_homer_gothic_hiccups.pl  # Merges results from all three tools
 ├── EP_database.pl              # Generates enhancer-promoter interaction database
 ├── Homer/
-│   ├── run_homer_HiC.sh        # Full HOMER pipeline
-│   ├── splitChrom.sh           # Split interactions by chromosome
-│   ├── run_allChr.pl           # Filter per chromosome (18 parallel jobs)
-│   ├── homer2bed_simple.pl     # Filter FDR<=0.05, reads>=10
-│   └── merge.pl                # Merge all chromosomes
+│   ├── run_analyzeHiC_parallel.sh  # makeTagDirectory + per-chr analyzeHiC (parallel)
+│   ├── splitChrom.sh               # Split interactions by chromosome
+│   ├── run_allChr.pl               # Filter per chromosome (18 parallel jobs)
+│   ├── homer2bed_simple.pl         # Filter FDR<=0.05, reads>=10
+│   └── merge.pl                    # Merge all chromosomes
 ├── gothic/
 │   ├── run_gothic_HiC.sh       # Full GOTHiC pipeline
 │   ├── gothic2bed.pl           # Filter FDR<=0.05, reads>=10
@@ -165,16 +165,15 @@ perl ~/PreprocessDB/Hi-C/pre2homer_gothic.pl \
 ### Step 2A — HOMER
 
 ```bash
-bash ~/PreprocessDB/Hi-C/Homer/run_homer_HiC.sh \
-    <sample> <input.pre> <outdir> <resolution>
+bash ~/PreprocessDB/Hi-C/Homer/run_analyzeHiC_parallel.sh \
+    <sample> <homer_file> <outdir> <resolution> [max_jobs]
 ```
 
 Internally runs:
-1. `makeTagDirectory` — index pairs into HOMER tag directory
-2. `analyzeHiC` — call all interactions with Z-score, LogP, FDR
-3. `splitChrom.sh` — split by chromosome
-4. `run_allChr.pl` — filter FDR ≤ 0.05, reads ≥ 10 (18 parallel chr jobs)
-5. `merge.pl` → `allchr.sigInteractions.HOMER`
+1. `makeTagDirectory` — index pairs into HOMER tag directory (skipped if already exists)
+2. `analyzeHiC` — per-chromosome in parallel, call interactions with Z-score, LogP, FDR
+3. `run_allChr.pl` — filter FDR ≤ 0.05, reads ≥ 10 (18 parallel chr jobs)
+4. `merge.pl` → `allchr.sigInteractions.HOMER`
 
 ### Step 2B — GOTHiC
 
