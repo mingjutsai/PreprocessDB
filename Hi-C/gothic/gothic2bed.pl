@@ -1,41 +1,46 @@
 #!/usr/bin/perl
 use strict;
 use warnings;
+
+# GOTHiChicup() output columns (0-indexed):
+#   0:chr1  1:locus1  2:chr2  3:locus2  4:relCoverage1  5:relCoverage2
+#   6:probability  7:expected  8:readCount  9:pvalue  10:qvalue  11:logObservedOverExpected
+
 my $input = $ARGV[0];
-my $res = $ARGV[1];
-if(@ARGV < 2){
-    print STDERR "perl gothic2bed.pl input res(ex: 2000)\n";die;
+my $res   = $ARGV[1];
+if (@ARGV < 2) {
+    print STDERR "perl gothic2bed.pl input res (e.g. 2000)\n"; die;
 }
-my $output = $input."_peak1_peak2_res.".$res.".bed";
-open OUT,">",$output;
-open IN,"<",$input;
-while(my $line=<IN>){
+
+my $output = $input . "_peak1_peak2_res." . $res . ".bed";
+open OUT, ">", $output or die "Cannot open $output: $!";
+open IN,  "<", $input  or die "Cannot open $input: $!";
+
+my $header = <IN>;  # skip header
+
+while (my $line = <IN>) {
     chomp $line;
-    my @ele = split(/\t/,$line);
-    my $chr_bin1 = $ele[0];
-    my $chr_bin2 = $ele[3];
-    $chr_bin1 =~ s/chr//;
-    $chr_bin2 =~ s/chr//;
-    if($chr_bin2 ne $chr_bin1){
-        next;
-    }
-    my $start_bin1 = $ele[1] + 0;
-    my $end_bin1 = $ele[2] + 0;
-    my $start_bin2 = $ele[4] + 0;
-    my $end_bin2 = $ele[5] + 0;
-    my $bin1_id = $chr_bin1.":".$start_bin1.":".$start_bin2;
-    my $bin2_id = $chr_bin2.":".$start_bin2.":".$start_bin1;
-    my $readcount = $ele[10];
-    if($readcount < 10){
-        next;
-    }
-    my $qvalue = sprintf("%.2e",$ele[12]);
-    if($qvalue > 0.05){
-        next;
-    }
-    my $id = $chr_bin1.":".$start_bin1.":".$start_bin2;
-    print OUT $bin1_id."\t".$readcount."\t".$qvalue."\n";
-    print OUT $bin2_id."\t".$readcount."\t".$qvalue."\n";
+    my @ele = split(/\t/, $line);
+    next if @ele < 11;
+
+    my $chr1 = $ele[0]; $chr1 =~ s/"//g; $chr1 =~ s/^chr//;
+    my $chr2 = $ele[2]; $chr2 =~ s/"//g; $chr2 =~ s/^chr//;
+    next if $chr1 ne $chr2;
+
+    my $start1    = $ele[1] + 0;
+    my $start2    = $ele[3] + 0;
+    my $readcount = $ele[8] + 0;
+    my $qvalue    = $ele[10] + 0;
+
+    next if $readcount < 10;
+    next if $qvalue    > 0.05;
+
+    my $bin1_id  = $chr1 . ":" . $start1 . ":" . $start2;
+    my $bin2_id  = $chr2 . ":" . $start2 . ":" . $start1;
+    my $qval_fmt = sprintf("%.2e", $qvalue);
+
+    print OUT $bin1_id . "\t" . $readcount . "\t" . $qval_fmt . "\n";
+    print OUT $bin2_id . "\t" . $readcount . "\t" . $qval_fmt . "\n";
 }
 close IN;
 close OUT;

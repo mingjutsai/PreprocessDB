@@ -100,7 +100,7 @@ RSCRIPT
         [ -f ${SAMPLE}_chr${i}_gothic.results ] && \
             perl $PREPROCESS/gothic/gothic2bed.pl ${SAMPLE}_chr${i}_gothic.results $RES
     done
-    perl $PREPROCESS/gothic/merge.pl
+    perl $PREPROCESS/gothic/merge.pl $SAMPLE $RES
     echo "[GOTHiC $(date)] Done → allchr.sigInteractions.gothic"
 ) > $WORKDIR/gothic_${RES}/gothic.log 2>&1 &
 GOTHIC_PID=$!
