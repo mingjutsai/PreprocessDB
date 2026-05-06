@@ -84,7 +84,7 @@ done
 
 # ── Step 5: merge ─────────────────────────────────────────────────────────
 echo "[$(date)] Step 5/5 — Merging all chromosomes..."
-perl $PREPROCESS/merge.pl
+perl $PREPROCESS/merge.pl $SAMPLE $RES
 
 echo "[$(date)] Done."
 echo "Final output: $OUTDIR/allchr.sigInteractions.gothic"
