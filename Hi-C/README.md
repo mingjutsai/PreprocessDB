@@ -221,3 +221,98 @@ perl ~/PreprocessDB/Hi-C/EP_database.pl merge_results.txt
 ```
 
 Output: `merge_results.txt_EP.bed`
+
+
+---
+
+## Chromosome-wise KR-normalized matrices with Straw
+
+Use `split_hic_KR.sh` to extract one intrachromosomal KR-normalized sparse contact matrix for each canonical chromosome (1-22, X, and Y) from an existing Juicer `.hic` file.
+
+The file must already contain the selected resolution and KR normalization vectors. Straw extracts those normalized values; it does not calculate new KR vectors from raw read pairs.
+
+### Install Straw
+
+Build the vendored C++ implementation:
+
+```bash
+cd ~/PreprocessDB/Hi-C/straw
+./build.sh
+```
+
+The executable is written to `~/PreprocessDB/Hi-C/straw/build/straw`. For dependencies, `.hic` resolution inspection, individual extraction examples, and troubleshooting, see [`straw/README.md`](straw/README.md). The vendored implementation is based on the upstream [`aidenlab/straw`](https://github.com/aidenlab/straw) project.
+
+### Check available resolutions and chromosome names
+
+Before extraction, run the `.hic` header-inspection command under **List resolutions stored in a `.hic` file** in [`straw/README.md`](straw/README.md). Choose one of the reported BP resolutions exactly and note whether chromosome names include the `chr` prefix.
+
+Example metadata:
+
+```text
+BP_resolutions: 2500000 500000 100000 50000 25000 10000 5000 2000
+chromosomes: ALL M 1 2 3 4 5 6 7 8 9 10 11 12 13 14 15 16 17 18 19 20 21 22 X Y
+```
+
+### Extract all chromosomes in parallel
+
+General syntax:
+
+```text
+split_hic_KR.sh INPUT.hic OUTPUT_DIR RESOLUTION [JOBS] [STRAW]
+```
+
+For chromosome names without `chr` (`1`, `2`, ..., `X`, `Y`):
+
+```bash
+cd /path/to/workdir
+CHROM_PREFIX= bash ~/PreprocessDB/Hi-C/split_hic_KR.sh \
+    sample.hic 2k_parallel 2000 2 \
+    ~/PreprocessDB/Hi-C/straw/build/straw
+```
+
+For chromosome names with `chr` (`chr1`, `chr2`, ..., `chrX`, `chrY`), omit `CHROM_PREFIX=`:
+
+```bash
+cd /path/to/workdir
+bash ~/PreprocessDB/Hi-C/split_hic_KR.sh \
+    sample.hic 2k_parallel 2000 2 \
+    ~/PreprocessDB/Hi-C/straw/build/straw
+```
+
+`JOBS` controls the number of simultaneous chromosome extractions; the examples use two. Increase it only when sufficient CPU and memory are available.
+
+Outputs are named as follows:
+
+```text
+2k_parallel/sample.hic.KR.chr1
+2k_parallel/sample.hic.KR.chr2
+...
+2k_parallel/sample.hic.KR.chrX
+2k_parallel/sample.hic.KR.chrY
+```
+
+Each row contains three tab-delimited fields:
+
+```text
+bin1_start    bin2_start    KR_normalized_contact_value
+```
+
+### Validate outputs
+
+Confirm that all 24 files exist and no temporary files remain:
+
+```bash
+find 2k_parallel -maxdepth 1 -type f \
+    -name 'sample.hic.KR.chr*' ! -name '*.tmp.*' | wc -l
+find 2k_parallel -maxdepth 1 -type f -name '*.tmp.*'
+```
+
+The first command should print `24`; the second should print nothing.
+
+Check three-column formatting and coordinate alignment, replacing `2000` when using another resolution:
+
+```bash
+awk 'NF != 3 || $1 % 2000 || $2 % 2000 {exit 1}' \
+    2k_parallel/sample.hic.KR.chr1 \
+    && echo 'format and 2 kb alignment: PASS'
+```
